@@ -45,8 +45,11 @@ export default function App() {
   }, [aboutOpen]);
 
   return (
-    <main className="min-h-svh bg-[#080808] px-3 py-3 text-[#111111] sm:px-6 sm:py-5 lg:px-14 lg:py-8">
-      <section className="mx-auto flex min-h-[calc(100svh-24px)] max-w-[1440px] flex-col rounded-[22px] bg-[#f1efe9] px-5 pt-6 pb-5 sm:min-h-[calc(100svh-40px)] sm:px-6 lg:min-h-[calc(100svh-64px)]" aria-label="Tsunami of Words typography playground">
+    <main className="min-h-svh w-full bg-[#f3f1ec] text-[#111111]">
+      <section
+        className="flex min-h-svh w-full flex-col bg-[#f3f1ec] px-5 pt-6 pb-5 sm:px-8 lg:px-12"
+        aria-label="Tsunami of Words typography playground"
+      >
         <header className="flex shrink-0 items-center justify-between gap-4 text-[12px] font-normal tracking-[0.025em] sm:text-[16px]">
           <a href="#home" className="outline-offset-4 transition-opacity hover:opacity-60 focus-visible:underline">
             TSUNAMI OF WORDS
