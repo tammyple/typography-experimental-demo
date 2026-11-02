@@ -1,0 +1,315 @@
+
+/* ======================================
+   SCROLL EXPERIENCE
+====================================== */
+
+.sphere-experiment {
+  position: relative;
+  height: 215svh;
+  background: #f3f1ec;
+  color: #171717;
+}
+
+/* Stays in the viewport as the user scrolls */
+.sphere-shell {
+  position: sticky;
+  top: 0;
+
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px;
+  height: 100svh;
+  margin: 0 auto;
+
+  padding:
+    clamp(12px, 2.3vh, 25px)
+    clamp(18px, 3.5vw, 52px);
+
+  display: grid;
+
+  grid-template-rows:
+    auto
+    1px
+    minmax(0, 1fr)
+    1px
+    auto
+    auto;
+
+  gap: clamp(8px, 1.35vh, 16px);
+}
+
+/* ======================================
+   SMALLER HEADER
+====================================== */
+
+.sphere-heading {
+  min-width: 0;
+}
+
+.sphere-eyebrow {
+  margin: 0;
+
+  font: 400 0.68rem/1.3 Arial, sans-serif;
+  letter-spacing: 0.08em;
+  color: #77746d;
+}
+
+.sphere-heading h2 {
+  margin: 0.4rem 0 0;
+
+  font: 400 clamp(
+    1.95rem,
+    3.4vw,
+    3.4rem
+  )/1.03 Georgia, serif;
+
+  letter-spacing: -0.045em;
+}
+
+.sphere-divider {
+  width: 100%;
+  height: 1px;
+  background: #b9b6ae;
+}
+
+/* ======================================
+   RESPONSIVE SPHERE STAGE
+====================================== */
+
+.sphere-stage {
+  position: relative;
+
+  /* Occupy the remaining available height */
+  min-height: 0;
+  width: 100%;
+
+  overflow: hidden;
+  perspective: 850px;
+}
+
+/* ======================================
+   ANIMATED WORDS
+====================================== */
+
+.sphere-word-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sphere-word {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  opacity: 0;
+  white-space: nowrap;
+
+  font: 400 clamp(
+    1rem,
+    2.35vw,
+    2.35rem
+  )/1.25 Georgia, serif;
+
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+/* ======================================
+   FINAL POEM POSITIONING
+====================================== */
+
+.sphere-final-layout {
+  position: absolute;
+  inset: 0;
+
+  padding: 0 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.2em;
+  opacity: 0;
+  pointer-events: none;
+
+  font: 400 clamp(
+    1rem,
+    2.35vw,
+    2.35rem
+  )/1.25 Georgia, serif;
+}
+
+.sphere-poem-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+
+  gap: 0 0.24em;
+  text-align: center;
+}
+
+/* ======================================
+   FOOTER AND BUTTON
+====================================== */
+
+.sphere-controls {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.sphere-description {
+  margin: 0.42rem 0 0;
+
+  font: 400 clamp(
+    0.82rem,
+    1.15vw,
+    1rem
+  )/1.4 Arial, sans-serif;
+}
+
+.sphere-action {
+  display: flex;
+  align-items: center;
+
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sphere-progress,
+.sphere-scroll-hint {
+  font: 400 0.68rem/1.3 Arial, sans-serif;
+  letter-spacing: 0.035em;
+  color: #77746d;
+}
+
+.sphere-cta {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+
+  padding: 0.4rem 0;
+
+  background: transparent;
+  color: #171717;
+
+  font: 400 0.95rem/1.25 Arial, sans-serif;
+  cursor: pointer;
+}
+
+.sphere-cta:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 4px;
+}
+
+.sphere-scroll-note {
+  margin: 0;
+  text-align: right;
+}
+
+/* ======================================
+   SMALL INSTRUCTIONS
+====================================== */
+
+.sphere-pointer-hint {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  margin: 0;
+  white-space: nowrap;
+
+  font: 400 0.58rem/1.25 Arial, sans-serif;
+  letter-spacing: 0.08em;
+  color: #929087;
+
+  pointer-events: none;
+}
+
+/* Screen-reader-only poem */
+.sphere-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ======================================
+   REDUCED MOTION
+====================================== */
+
+.sphere-reduced-motion {
+  height: 100svh;
+}
+
+/* ======================================
+   MOBILE
+====================================== */
+
+@media (max-width: 700px) {
+  .sphere-shell {
+    padding: 18px;
+    gap: 9px;
+  }
+
+  .sphere-heading h2 {
+    font-size: clamp(
+      1.7rem,
+      7vw,
+      2.5rem
+    );
+  }
+
+  .sphere-word,
+  .sphere-final-layout {
+    font-size: clamp(
+      0.95rem,
+      4vw,
+      1.4rem
+    );
+  }
+
+  .sphere-controls {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sphere-action {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .sphere-scroll-note {
+    text-align: left;
+  }
+
+  .sphere-pointer-hint {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  .sphere-pointer-hint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sphere-word {
+    will-change: auto;
+  }
+}
