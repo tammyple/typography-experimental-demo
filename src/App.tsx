@@ -1,42 +1,91 @@
 
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
 } from 'react';
-
 import { gsap } from 'gsap';
 import SphereToPoem from './SphereToPoem';
 import './styles.css';
 
-type Effect = 'still' | 'float' | 'distort' | 'type';
+type Effect = 'still' | 'float' | 'scramble' | 'type';
 
-const EFFECTS: { id: Effect; label: string }[] = [
-  { id: 'still', label: 'STILL' },
-  { id: 'float', label: 'FLOAT' },
-  { id: 'distort', label: 'DISTORT' },
-  { id: 'type', label: 'TYPE' },
+const WORD = 'ARCHIVE';
+
+const EFFECTS: {
+  id: Effect;
+  label: string;
+  hoverHint: string;
+  selectedHint: string;
+}[] = [
+  {
+    id: 'still',
+    label: 'STILL',
+    hoverHint: 'Every letter returns to its original place.',
+    selectedHint: 'Everything is still.',
+  },
+  {
+    id: 'float',
+    label: 'FLOAT',
+    hoverHint: 'Letters drift and bounce between the lines.',
+    selectedHint: 'Grab a letter, move it, and throw it.',
+  },
+  {
+    id: 'scramble',
+    label: 'SCRAMBLE',
+    hoverHint: 'Letters change before finding their way back.',
+    selectedHint: 'Watch the letters scramble, then resolve.',
+  },
+  {
+    id: 'type',
+    label: 'TYPE',
+    hoverHint: 'The word reveals itself one letter at a time.',
+    selectedHint: 'Watch the word being typed out.',
+  },
 ];
-
-const WORD = 'WORDS';
-
-// ----------------------------------------
-// FLOAT SETTINGS
-// ----------------------------------------
 
 const FLOAT = {
   speed: 42,
   drift: 8,
   padding: 22,
-
-  floatBounce: 0.80,
+  floatBounce: 0.8,
   throwBounce: 0.96,
-
   throwMultiplier: 0.85,
   maxThrowSpeed: 620,
   minThrowSpeed: 75,
+};
+
+type Particle = {
+  el: HTMLSpanElement;
+  index: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  homeVx: number;
+  homeVy: number;
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  throwStrength: number;
+  dragging: boolean;
+  pointerId: number | null;
+  startPointerX: number;
+  startPointerY: number;
+  startX: number;
+  startY: number;
+  lastPointerX: number;
+  lastPointerY: number;
+  lastMoveAt: number;
+  releaseVX: number;
+  releaseVY: number;
+  squash: number;
+  squashVelocity: number;
+  squashAxis: 'x' | 'y';
 };
 
 function EffectLabel({
@@ -53,8 +102,8 @@ function EffectLabel({
     >
       {label.split('').map((letter, i) => (
         <span
-          className="preview-letter"
           key={`${letter}-${i}`}
+          className="preview-letter"
           style={{ '--i': i } as CSSProperties}
         >
           {letter}
@@ -64,106 +113,113 @@ function EffectLabel({
   );
 }
 
-// Each floating letter has its own physics state.
-type Particle = {
-  el: HTMLSpanElement;
-  index: number;
-
-  x: number;
-  y: number;
-
-  vx: number;
-  vy: number;
-
-  homeVx: number;
-  homeVy: number;
-
-  minX: number;
-  maxX: number;
-  minY: number;
-  maxY: number;
-
-  throwStrength: number;
-
-  dragging: boolean;
-  pointerId: number | null;
-
-  startPointerX: number;
-  startPointerY: number;
-  startX: number;
-  startY: number;
-
-  lastPointerX: number;
-  lastPointerY: number;
-  lastMoveAt: number;
-
-  releaseVX: number;
-  releaseVY: number;
-
-  squash: number;
-  squashVelocity: number;
-  squashAxis: 'x' | 'y';
-};
-
 export default function App() {
   const [effect, setEffect] = useState<Effect>('still');
+  const [replay, setReplay] = useState(0);
   const [aboutOpen, setAboutOpen] = useState(false);
+
+  // Temporary instruction / effect description.
+  const [hint, setHint] = useState(
+    'Choose an effect to bring the words to life.'
+  );
+  const [hintVisible, setHintVisible] = useState(true);
 
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const hintTimer = useRef<number | null>(null);
 
-  const letterRefs =
-    useRef<(HTMLSpanElement | null)[]>([]);
+  // ========================================
+  // CONTEXTUAL HINTS
+  // ========================================
 
-  const displacementRef =
-    useRef<SVGFEDisplacementMapElement>(null);
+  const showHint = useCallback(
+    (message: string, milliseconds = 3000) => {
+      // Cancel the old timer, if any.
+      if (hintTimer.current !== null) {
+        window.clearTimeout(hintTimer.current);
+      }
 
-  // ----------------------------------------
-  // ABOUT MODAL
-  // ----------------------------------------
+      setHint(message);
+      setHintVisible(true);
+
+      // Fade after approximately three seconds.
+      hintTimer.current = window.setTimeout(() => {
+        setHintVisible(false);
+      }, milliseconds);
+    },
+    []
+  );
+
+  useEffect(() => {
+    // The opening hint is visible for three seconds.
+    hintTimer.current = window.setTimeout(() => {
+      setHintVisible(false);
+    }, 3000);
+
+    return () => {
+      if (hintTimer.current !== null) {
+        window.clearTimeout(hintTimer.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!aboutOpen) return;
 
-    const closeOnEscape = (event: KeyboardEvent) => {
+    const onEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setAboutOpen(false);
       }
     };
 
-    document.addEventListener(
-      'keydown',
-      closeOnEscape
-    );
+    document.addEventListener('keydown', onEscape);
 
     return () => {
-      document.removeEventListener(
-        'keydown',
-        closeOnEscape
-      );
+      document.removeEventListener('keydown', onEscape);
     };
   }, [aboutOpen]);
 
-  // ----------------------------------------
-  // MAIN TYPOGRAPHY EFFECTS
-  // ----------------------------------------
+  function selectEffect(next: Effect) {
+    const selected = EFFECTS.find(
+      (item) => item.id === next
+    )!;
+
+    // Clicking displays the relevant instruction.
+    showHint(selected.selectedHint, 3000);
+
+    if (next === effect) {
+      // Clicking SCRAMBLE or TYPE again replays it.
+      if (next === 'scramble' || next === 'type') {
+        setReplay((n) => n + 1);
+      }
+    } else {
+      setEffect(next);
+    }
+  }
+
+  // ========================================
+  // MAIN TYPOGRAPHY ANIMATIONS
+  // ========================================
 
   useLayoutEffect(() => {
     const stage = stageRef.current;
 
     const letters = letterRefs.current.filter(
-      (el): el is HTMLSpanElement => el !== null
+      (node): node is HTMLSpanElement => node !== null
     );
 
-    if (!stage || letters.length !== WORD.length) {
-      return;
-    }
+    if (!stage || letters.length !== WORD.length) return;
 
-    const cleanupHandlers: Array<() => void> = [];
     let removeTicker: (() => void) | undefined;
+    const removeHandlers: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
-      // Reset when switching effects.
+      // Always restore the original text first.
+      letters.forEach((letter, i) => {
+        letter.textContent = WORD[i];
+      });
+
       gsap.set(letters, {
         x: 0,
         y: 0,
@@ -175,7 +231,6 @@ export default function App() {
         autoAlpha: 1,
       });
 
-      // Keep the text static for reduced-motion users.
       if (
         window.matchMedia(
           '(prefers-reduced-motion: reduce)'
@@ -191,15 +246,12 @@ export default function App() {
       if (effect === 'float') {
         const bounds = stage.getBoundingClientRect();
 
-        // Give every letter its own position,
-        // velocity, boundaries and drag state.
         const particles: Particle[] = letters.map(
           (el, index) => {
             const rect = el.getBoundingClientRect();
 
             const theta =
-              (index / letters.length) *
-                Math.PI * 2 +
+              (index / letters.length) * Math.PI * 2 +
               0.4;
 
             const homeVx =
@@ -208,62 +260,43 @@ export default function App() {
             const homeVy =
               Math.sin(theta) * FLOAT.speed;
 
-            // Letter-specific movement boundaries.
             const minX =
-              bounds.left +
-              FLOAT.padding -
-              rect.left;
+              bounds.left + FLOAT.padding - rect.left;
 
             const maxX =
-              bounds.right -
-              FLOAT.padding -
-              rect.right;
+              bounds.right - FLOAT.padding - rect.right;
 
             const minY =
-              bounds.top +
-              FLOAT.padding -
-              rect.top;
+              bounds.top + FLOAT.padding - rect.top;
 
             const maxY =
-              bounds.bottom -
-              FLOAT.padding -
-              rect.bottom;
+              bounds.bottom - FLOAT.padding - rect.bottom;
 
             return {
               el,
               index,
-
               x: 0,
               y: 0,
-
               vx: homeVx,
               vy: homeVy,
-
               homeVx,
               homeVy,
-
               minX: Math.min(minX, maxX),
               maxX: Math.max(minX, maxX),
               minY: Math.min(minY, maxY),
               maxY: Math.max(minY, maxY),
-
               throwStrength: 0,
-
               dragging: false,
               pointerId: null,
-
               startPointerX: 0,
               startPointerY: 0,
               startX: 0,
               startY: 0,
-
               lastPointerX: 0,
               lastPointerY: 0,
               lastMoveAt: 0,
-
               releaseVX: 0,
               releaseVY: 0,
-
               squash: 0,
               squashVelocity: 0,
               squashAxis: 'x',
@@ -272,17 +305,12 @@ export default function App() {
         );
 
         const clamp = gsap.utils.clamp;
-        const now = () => performance.now();
 
         // ====================================
-        // POINTER EVENTS FOR EVERY LETTER
+        // POINTER EVENTS
         // ====================================
 
         particles.forEach((p) => {
-          // --------------------------------
-          // GRAB
-          // --------------------------------
-
           const onDown = (event: PointerEvent) => {
             if (event.button !== 0 || p.dragging) {
               return;
@@ -293,32 +321,22 @@ export default function App() {
             p.dragging = true;
             p.pointerId = event.pointerId;
 
-            // Record the cursor position when grabbed.
             p.startPointerX = event.clientX;
             p.startPointerY = event.clientY;
-
-            // Record the letter's current position.
             p.startX = p.x;
             p.startY = p.y;
 
             p.lastPointerX = event.clientX;
             p.lastPointerY = event.clientY;
-            p.lastMoveAt = now();
+            p.lastMoveAt = performance.now();
 
             p.releaseVX = 0;
             p.releaseVY = 0;
             p.throwStrength = 0;
 
             p.el.classList.add('is-dragging');
-
-            // Continue receiving pointer events even
-            // when dragging outside the letter.
             p.el.setPointerCapture(event.pointerId);
           };
-
-          // --------------------------------
-          // DRAG
-          // --------------------------------
 
           const onMove = (event: PointerEvent) => {
             if (
@@ -328,37 +346,29 @@ export default function App() {
               return;
             }
 
-            const currentTime = now();
+            const now = performance.now();
 
-            const seconds = Math.max(
-              (currentTime - p.lastMoveAt) / 1000,
+            const dt = Math.max(
+              (now - p.lastMoveAt) / 1000,
               0.008
             );
 
-            // How quickly is the cursor moving?
             const vx =
-              (event.clientX - p.lastPointerX) /
-              seconds;
+              (event.clientX - p.lastPointerX) / dt;
 
             const vy =
-              (event.clientY - p.lastPointerY) /
-              seconds;
+              (event.clientY - p.lastPointerY) / dt;
 
-            // Blend recent velocities so throwing
-            // doesn't depend on a single event.
             p.releaseVX =
               0.35 * p.releaseVX + 0.65 * vx;
 
             p.releaseVY =
               0.35 * p.releaseVY + 0.65 * vy;
 
-            p.lastMoveAt = currentTime;
-
+            p.lastMoveAt = now;
             p.lastPointerX = event.clientX;
             p.lastPointerY = event.clientY;
 
-            // Follow the cursor, but stay inside
-            // the stage's invisible boundaries.
             p.x = clamp(
               p.minX,
               p.maxX,
@@ -376,10 +386,6 @@ export default function App() {
             );
           };
 
-          // --------------------------------
-          // RELEASE / THROW
-          // --------------------------------
-
           const release = (event: PointerEvent) => {
             if (
               !p.dragging ||
@@ -390,73 +396,49 @@ export default function App() {
 
             p.dragging = false;
             p.pointerId = null;
-
             p.el.classList.remove('is-dragging');
 
             if (
               p.el.hasPointerCapture(event.pointerId)
             ) {
-              p.el.releasePointerCapture(
-                event.pointerId
-              );
+              p.el.releasePointerCapture(event.pointerId);
             }
 
-            // If the cursor stopped before release,
-            // don't create an artificial throw.
-            const wasMoving =
-              now() - p.lastMoveAt < 110;
+            const moving =
+              performance.now() - p.lastMoveAt < 110;
 
-            const vx = wasMoving
+            const vx = moving
               ? p.releaseVX * FLOAT.throwMultiplier
               : 0;
 
-            const vy = wasMoving
+            const vy = moving
               ? p.releaseVY * FLOAT.throwMultiplier
               : 0;
 
-            const speed = Math.hypot(vx, vy);
+            const magnitude = Math.hypot(vx, vy);
 
-            if (speed >= FLOAT.minThrowSpeed) {
-              // Limit very aggressive throws.
+            if (magnitude >= FLOAT.minThrowSpeed) {
               const scale = Math.min(
                 1,
-                FLOAT.maxThrowSpeed / speed
+                FLOAT.maxThrowSpeed / magnitude
               );
 
               p.vx = vx * scale;
               p.vy = vy * scale;
-
-              // Use stronger bouncing temporarily.
               p.throwStrength = 1;
             } else {
-              // Simply resume floating.
               p.vx = p.homeVx;
               p.vy = p.homeVy;
               p.throwStrength = 0;
             }
           };
 
-          p.el.addEventListener(
-            'pointerdown',
-            onDown
-          );
+          p.el.addEventListener('pointerdown', onDown);
+          p.el.addEventListener('pointermove', onMove);
+          p.el.addEventListener('pointerup', release);
+          p.el.addEventListener('pointercancel', release);
 
-          p.el.addEventListener(
-            'pointermove',
-            onMove
-          );
-
-          p.el.addEventListener(
-            'pointerup',
-            release
-          );
-
-          p.el.addEventListener(
-            'pointercancel',
-            release
-          );
-
-          cleanupHandlers.push(() => {
+          removeHandlers.push(() => {
             p.el.removeEventListener(
               'pointerdown',
               onDown
@@ -478,6 +460,13 @@ export default function App() {
             );
 
             p.el.classList.remove('is-dragging');
+
+            if (
+              p.pointerId !== null &&
+              p.el.hasPointerCapture(p.pointerId)
+            ) {
+              p.el.releasePointerCapture(p.pointerId);
+            }
           });
         });
 
@@ -500,16 +489,11 @@ export default function App() {
 
           for (const p of particles) {
             if (!p.dragging) {
-              // --------------------------------
-              // THROWN LETTERS SLOW DOWN
-              // --------------------------------
-
-              // Strong bounce gradually disappears.
+              // Thrown letters slowly lose energy.
               p.throwStrength *= Math.exp(
                 -0.9 * dt
               );
 
-              // Return toward gentle floating velocity.
               const returning =
                 1 - Math.exp(-0.65 * dt);
 
@@ -519,7 +503,7 @@ export default function App() {
               p.vy +=
                 (p.homeVy - p.vy) * returning;
 
-              // Add subtle changes in direction.
+              // Subtle floating drift.
               p.vx +=
                 Math.sin(
                   elapsed * 0.72 +
@@ -536,71 +520,43 @@ export default function App() {
                 FLOAT.drift *
                 dt;
 
-              // Move according to velocity.
               p.x += p.vx * dt;
               p.y += p.vy * dt;
 
-              // --------------------------------
-              // CHOOSE BOUNCE STRENGTH
-              // --------------------------------
-
-              // Immediately after throwing, the
-              // bounce is stronger. It gradually
-              // returns to the float bounce.
               const bounce =
                 FLOAT.floatBounce +
-                (
-                  FLOAT.throwBounce -
-                  FLOAT.floatBounce
-                ) *
+                (FLOAT.throwBounce -
+                  FLOAT.floatBounce) *
                   p.throwStrength;
 
               let hitX = false;
               let hitY = false;
 
-              // --------------------------------
-              // LEFT / RIGHT BOUNDARIES
-              // --------------------------------
-
+              // Horizontal boundaries.
               if (p.x <= p.minX) {
                 p.x = p.minX;
-
                 p.vx = Math.abs(p.vx) * bounce;
                 p.homeVx = Math.abs(p.homeVx);
-
                 hitX = true;
               } else if (p.x >= p.maxX) {
                 p.x = p.maxX;
-
                 p.vx = -Math.abs(p.vx) * bounce;
                 p.homeVx = -Math.abs(p.homeVx);
-
                 hitX = true;
               }
 
-              // --------------------------------
-              // TOP / BOTTOM BOUNDARIES
-              // --------------------------------
-
+              // Vertical boundaries.
               if (p.y <= p.minY) {
                 p.y = p.minY;
-
                 p.vy = Math.abs(p.vy) * bounce;
                 p.homeVy = Math.abs(p.homeVy);
-
                 hitY = true;
               } else if (p.y >= p.maxY) {
                 p.y = p.maxY;
-
                 p.vy = -Math.abs(p.vy) * bounce;
                 p.homeVy = -Math.abs(p.homeVy);
-
                 hitY = true;
               }
-
-              // --------------------------------
-              // SMALL ELASTIC BOUNCE
-              // --------------------------------
 
               if (hitX || hitY) {
                 p.squashAxis = hitX ? 'x' : 'y';
@@ -614,32 +570,12 @@ export default function App() {
               }
             }
 
-            // ==================================
-            // DAMPED SPRING DEFORMATION
-            // ==================================
-
+            // Damped elastic recovery.
             p.squashVelocity +=
-              (
-                -100 * p.squash -
-                12 * p.squashVelocity
-              ) * dt;
+              (-100 * p.squash -
+                12 * p.squashVelocity) * dt;
 
-            p.squash +=
-              p.squashVelocity * dt;
-
-            const scaleX =
-              p.squashAxis === 'x'
-                ? 1 - p.squash
-                : 1 + p.squash * 0.4;
-
-            const scaleY =
-              p.squashAxis === 'y'
-                ? 1 - p.squash
-                : 1 + p.squash * 0.4;
-
-            // ==================================
-            // UPDATE LETTER APPEARANCE
-            // ==================================
+            p.squash += p.squashVelocity * dt;
 
             gsap.set(p.el, {
               x: p.x,
@@ -653,11 +589,15 @@ export default function App() {
 
               scaleX: p.dragging
                 ? 1.08
-                : scaleX,
+                : p.squashAxis === 'x'
+                  ? 1 - p.squash
+                  : 1 + p.squash * 0.4,
 
               scaleY: p.dragging
                 ? 1.08
-                : scaleY,
+                : p.squashAxis === 'y'
+                  ? 1 - p.squash
+                  : 1 + p.squash * 0.4,
 
               zIndex: p.dragging ? 10 : 1,
             });
@@ -672,41 +612,102 @@ export default function App() {
       }
 
       // ======================================
-      // DISTORT
+      // SCRAMBLE — CHARACTER DECODING
       // ======================================
 
-      if (effect === 'distort') {
-        const map = displacementRef.current;
 
-        if (map) {
-          gsap.fromTo(
-            map,
-            { attr: { scale: 3 } },
-            {
-              attr: { scale: 17 },
-              duration: 1.7,
-              repeat: -1,
-              yoyo: true,
-              ease: 'sine.inOut',
-            }
-          );
-        }
-
-        gsap.to(letters, {
-          skewX: (i) => i % 2 === 0 ? -7 : 7,
-          scaleY: (i) => i % 2 === 0 ? 1.06 : 0.94,
-          y: (i) => i % 2 === 0 ? -7 : 7,
-
-          duration: 1.5,
-          stagger: 0.12,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
+      if (effect === 'scramble') {
+        const characters =
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?#%';
+      
+        // Keep each letter's original width so the
+        // overall composition doesn't jump around.
+        const widths = letters.map(
+          (letter) => letter.getBoundingClientRect().width
+        );
+      
+        letters.forEach((letter, i) => {
+          gsap.set(letter, {
+            width: widths[i],
+            textAlign: 'center',
+          });
         });
+      
+        const state = { progress: 0 };
+      
+        // Limit how often the random glyphs change.
+        let previousFrame = -1;
+      
+        function randomCharacter() {
+          return characters[
+            Math.floor(Math.random() * characters.length)
+          ];
+        }
+      
+        function updateScramble() {
+          // How many letters have been permanently revealed?
+          const lockedCount = Math.min(
+            WORD.length,
+            Math.floor(state.progress * WORD.length)
+          );
+      
+          // Change random characters about 28 times per second.
+          const currentFrame = Math.floor(
+            state.progress * 28
+          );
+      
+          if (
+            currentFrame === previousFrame &&
+            lockedCount < WORD.length
+          ) {
+            return;
+          }
+      
+          previousFrame = currentFrame;
+      
+          letters.forEach((letter, i) => {
+            if (i < lockedCount) {
+              // This letter has been decoded.
+              // It never scrambles again during this cycle.
+              letter.textContent = WORD[i];
+            } else {
+              // This letter is still being decoded.
+              letter.textContent = randomCharacter();
+            }
+          });
+        }
+      
+        const timeline = gsap.timeline({
+          repeat: -1,
+          repeatDelay: 1.6,
+        });
+      
+        timeline
+          .call(() => {
+            // Begin each cycle with ALL letters scrambled.
+            state.progress = 0;
+            previousFrame = -1;
+            updateScramble();
+          })
+          .to(state, {
+            progress: 1,
+            duration: 1.05,
+            ease: 'none',
+      
+            onUpdate: updateScramble,
+      
+            onComplete: () => {
+              // Ensure the final word is always correct.
+              letters.forEach((letter, i) => {
+                letter.textContent = WORD[i];
+              });
+            },
+          });
       }
+      
 
       // ======================================
-      // TYPE
+      // TYPE — CHARACTER REVEAL
       // ======================================
 
       if (effect === 'type') {
@@ -723,14 +724,10 @@ export default function App() {
           timeline.call(
             () => {
               letters.forEach((el) => {
-                el.classList.remove(
-                  'typing-current'
-                );
+                el.classList.remove('typing-current');
               });
 
-              letter.classList.add(
-                'typing-current'
-              );
+              letter.classList.add('typing-current');
             },
             [],
             at
@@ -751,9 +748,7 @@ export default function App() {
         timeline.call(
           () => {
             letters.forEach((el) => {
-              el.classList.remove(
-                'typing-current'
-              );
+              el.classList.remove('typing-current');
             });
           },
           [],
@@ -762,25 +757,26 @@ export default function App() {
       }
     }, sectionRef);
 
-    // Clean up everything when changing modes.
+    // Clean up when switching effects.
     return () => {
       removeTicker?.();
 
-      cleanupHandlers.forEach((remove) => {
+      removeHandlers.forEach((remove) => {
         remove();
       });
 
       ctx.revert();
 
-      letters.forEach((el) => {
-        el.classList.remove('typing-current');
+      letters.forEach((letter, i) => {
+        letter.classList.remove('typing-current');
+        letter.textContent = WORD[i];
       });
     };
-  }, [effect]);
+  }, [effect, replay]);
 
-  // ----------------------------------------
-  // JSX
-  // ----------------------------------------
+  // ========================================
+  // PAGE STRUCTURE
+  // ========================================
 
   return (
     <main className="min-h-svh w-full bg-[#f3f1ec] text-[#171717]">
@@ -814,70 +810,32 @@ export default function App() {
 
         <div className="playground-divider" />
 
-        {/* Letters float within this stage */}
         <div
           id="home"
           ref={stageRef}
           className="playground-stage"
         >
-          {/* SVG filter for DISTORT */}
-          <svg
-            className="filter-definitions"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <defs>
-              <filter
-                id="words-distortion"
-                x="-10%"
-                y="-20%"
-                width="120%"
-                height="140%"
-              >
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="0.012 0.032"
-                  numOctaves="2"
-                  seed="4"
-                  result="noise"
-                />
-
-                <feDisplacementMap
-                  ref={displacementRef}
-                  in="SourceGraphic"
-                  in2="noise"
-                  scale="3"
-                  xChannelSelector="R"
-                  yChannelSelector="G"
-                />
-              </filter>
-            </defs>
-          </svg>
-
           <h1
             className={`artwork mode-${effect}`}
             aria-label={WORD}
           >
-            {WORD.split('').map((char, i) => (
+            {WORD.split('').map((character, i) => (
               <span
-                key={`${char}-${i}`}
+                key={`${character}-${i}`}
                 ref={(el) => {
                   letterRefs.current[i] = el;
                 }}
                 className="art-letter"
                 aria-hidden="true"
               >
-                {char}
+                {character}
               </span>
             ))}
           </h1>
         </div>
 
         <footer className="playground-footer">
-          <p
-            className="playground-mode"
-            aria-live="polite"
-          >
+          <p className="playground-mode">
             CURRENT MODE / {effect.toUpperCase()}
           </p>
 
@@ -885,32 +843,46 @@ export default function App() {
             className="playground-effects"
             aria-label="Typography effects"
           >
-            {EFFECTS.map(({ id, label }) => (
-              <button
-                type="button"
-                key={id}
-                aria-label={`${label.toLowerCase()} typography effect`}
-                aria-pressed={effect === id}
-                onClick={() => setEffect(id)}
-                className={`effect-control ${
-                  effect === id ? 'is-active' : ''
-                }`}
-              >
-                <EffectLabel
-                  label={label}
-                  effect={id}
-                />
+            {EFFECTS.map(
+              ({ id, label, hoverHint }) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-label={`${label.toLowerCase()} typography effect`}
+                  aria-pressed={effect === id}
+                  onMouseEnter={() =>
+                    showHint(hoverHint, 2700)
+                  }
+                  onFocus={() =>
+                    showHint(hoverHint, 2700)
+                  }
+                  onClick={() => selectEffect(id)}
+                  className={`effect-control ${
+                    effect === id ? 'is-active' : ''
+                  }`}
+                >
+                  <EffectLabel
+                    label={label}
+                    effect={id}
+                  />
 
-                <span
-                  className="effect-underline"
-                  aria-hidden="true"
-                />
-              </button>
-            ))}
+                  <span
+                    className="effect-underline"
+                    aria-hidden="true"
+                  />
+                </button>
+              )
+            )}
           </nav>
 
-          <p className="playground-caption">
-            Select an effect to change the typography.
+          {/* Temporary, contextual instruction */}
+          <p
+            className={`playground-caption ${
+              hintVisible ? 'is-visible' : ''
+            }`}
+            aria-live="polite"
+          >
+            {hint}
           </p>
         </footer>
       </section>
@@ -943,8 +915,8 @@ export default function App() {
               <button
                 type="button"
                 autoFocus
-                aria-label="Close about"
                 onClick={() => setAboutOpen(false)}
+                aria-label="Close about"
                 className="cursor-pointer text-2xl"
               >
                 ×
@@ -952,9 +924,9 @@ export default function App() {
             </div>
 
             <p className="mt-7 leading-relaxed">
-              Tsunami of Words explores how typography
-              changes when letters move, distort,
-              and find their way into language.
+              Tsunami of Words explores how letters
+              float, scramble, and assemble into
+              language.
             </p>
 
             <button

@@ -33,15 +33,14 @@ button {
 
 .playground-screen {
   box-sizing: border-box;
-
+  width: 100%;
   height: 100svh;
   min-height: 520px;
-  width: 100%;
+
+  padding: clamp(18px, 3vw, 42px);
 
   display: flex;
   flex-direction: column;
-
-  padding: clamp(18px, 3vw, 42px);
 
   background: var(--canvas);
 }
@@ -49,13 +48,11 @@ button {
 .playground-header {
   display: flex;
   flex-shrink: 0;
-
   align-items: center;
   justify-content: space-between;
-
   gap: 14px;
 
-  font: 400 clamp(12px, 1.1vw, 16px) / 1.4
+  font: 400 clamp(12px, 1.1vw, 16px)/1.4
     var(--font-ui);
 }
 
@@ -64,19 +61,8 @@ button {
   margin-top: clamp(24px, 5vh, 65px);
 }
 
-/* ======================================
-   ANIMATION STAGE
-
-   The stage lives between the two
-   horizontal divider lines.
-
-   overflow: hidden ensures the letters
-   cannot visually escape this region.
-====================================== */
-
 .playground-stage {
   position: relative;
-
   min-height: 0;
   flex: 1 1 auto;
 
@@ -88,33 +74,21 @@ button {
   isolation: isolate;
 }
 
-/* SVG filter definitions are invisible. */
-
-.filter-definitions {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
 /* ======================================
    MAIN TYPOGRAPHY
 ====================================== */
 
 .artwork {
   display: flex;
-
   width: min(100%, 1050px);
 
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 
   margin: 0;
-
   color: var(--ink);
 
-  font: 400 clamp(3.4rem, 12.9vw, 12rem) / 1
+  font: 400 clamp(3.4rem, 12.9vw, 12rem)/1
     var(--font-display);
 
   white-space: nowrap;
@@ -122,31 +96,16 @@ button {
 }
 
 .art-letter {
-  position: relative;
   display: inline-block;
   flex: none;
+  position: relative;
 
   transform-origin: 50% 50%;
-
   will-change: transform, opacity;
 }
 
 /* ======================================
-   DISTORT EFFECT
-
-   GSAP animates the individual letters.
-   The SVG filter deforms their contours.
-====================================== */
-
-.artwork.mode-distort {
-  filter: url(#words-distortion);
-}
-
-/* ======================================
-   TYPE EFFECT
-
-   The letters move closer together for
-   a more natural typewriter appearance.
+   TYPE
 ====================================== */
 
 .artwork.mode-type {
@@ -154,20 +113,16 @@ button {
   gap: 0.025em;
 }
 
-/* Blinking caret beside the current letter. */
-
 .mode-type .art-letter.typing-current::after {
   content: "";
-
   position: absolute;
 
-  height: 0.8em;
-  width: 2px;
-
-  background: currentColor;
-
-  right: -0.07em;
   top: 0.1em;
+  right: -0.07em;
+
+  width: 2px;
+  height: 0.8em;
+  background: currentColor;
 
   animation: type-caret 0.65s steps(1, end) infinite;
 }
@@ -179,12 +134,11 @@ button {
 }
 
 /* ======================================
-   EFFECT CONTROLS
+   FOOTER
 ====================================== */
 
 .playground-footer {
   flex: 0 0 auto;
-
   border-top: 1px solid var(--line);
 
   padding-top: clamp(16px, 2.7vh, 34px);
@@ -198,7 +152,7 @@ button {
 .playground-caption {
   color: #77746d;
 
-  font: 400 clamp(11px, 1vw, 15px) / 1.3
+  font: 400 clamp(11px, 1vw, 15px)/1.3
     var(--font-ui);
 
   text-align: center;
@@ -209,14 +163,26 @@ button {
   letter-spacing: 0.06em;
 }
 
+/* The space stays reserved when the hint fades. */
 .playground-caption {
   margin: 20px 0 0;
+  min-height: 1.3em;
+
+  opacity: 0;
+  transition: opacity 500ms ease;
 }
+
+.playground-caption.is-visible {
+  opacity: 1;
+}
+
+/* ======================================
+   EFFECT CONTROLS
+====================================== */
 
 .playground-effects {
   display: flex;
   flex-wrap: wrap;
-
   justify-content: center;
 
   gap: clamp(12px, 2vw, 30px);
@@ -224,15 +190,13 @@ button {
 
 .effect-control {
   position: relative;
-
   cursor: pointer;
 
   border: 0;
   background: none;
-
   padding: 5px 0 12px;
 
-  font: 400 clamp(14px, 1.4vw, 20px) / 1
+  font: 400 clamp(14px, 1.4vw, 20px)/1
     var(--font-ui);
 }
 
@@ -247,34 +211,26 @@ button {
 
 .effect-underline {
   display: block;
-
-  width: 100%;
-  height: 3px;
-
   position: absolute;
+
   left: 0;
   bottom: 0;
 
+  width: 100%;
+  height: 3px;
   background: #d0cec8;
 
   transition: background 180ms ease;
 }
 
-.effect-control.is-active .effect-underline {
+.effect-control.is-active .effect-underline,
+.effect-control.is-active:hover .effect-underline {
   background: var(--ink);
 }
 
 .effect-control:hover .effect-underline {
   background: #888;
 }
-
-.effect-control.is-active:hover .effect-underline {
-  background: var(--ink);
-}
-
-/* ======================================
-   CONTROL LABEL PREVIEWS
-====================================== */
 
 .preview {
   display: inline-flex;
@@ -286,63 +242,20 @@ button {
   position: relative;
 }
 
-/* SCATTER button preview
+/* ======================================
+   EFFECT LABEL PREVIEWS
+====================================== */
 
-.effect-control:is(:hover, :focus-visible)
-.preview-scatter .preview-letter {
-  transition: transform 0.5s ease;
-
-  transform: translate(
-    calc((var(--i) - 3) * 2px),
-    calc((var(--i) - 3) * (var(--i) - 3) * -0.6px)
-  );
-} */
-
-
-/* =====================================
-   FLOAT MODE — GRAB AND THROW
-===================================== */
-
-/* Allow the user to grab individual letters. */
-.artwork.mode-float .art-letter {
-  cursor: grab;
-
-  /* Prevent touch gestures from interfering
-     when someone drags a letter. */
-  touch-action: none;
-
-  user-select: none;
-
-  /* Slight visual emphasis on hover. */
-  -webkit-text-stroke: 0px currentColor;
-
-  transition: -webkit-text-stroke-width 150ms ease;
-}
-
-.artwork.mode-float .art-letter:hover {
-  -webkit-text-stroke-width: 0.6px;
-}
-
-/* While dragging, change the cursor. */
-.artwork.mode-float .art-letter.is-dragging {
-  cursor: grabbing;
-  -webkit-text-stroke-width: 0.8px;
-}
-
-/* =====================================
-   FLOAT BUTTON HOVER PREVIEW
-===================================== */
+/* FLOAT */
 
 .effect-control:is(:hover, :focus-visible)
 .preview-float .preview-letter {
   animation: preview-floating 1.8s ease-in-out infinite;
-
   animation-delay: calc(var(--i) * -0.24s);
 }
 
 @keyframes preview-floating {
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0);
   }
 
@@ -351,38 +264,38 @@ button {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .preview-float .preview-letter {
-    animation: none !important;
-  }
-}
-
-/* DISTORT button preview */
+/* SCRAMBLE */
 
 .effect-control:is(:hover, :focus-visible)
-.preview-distort .preview-letter {
-  animation: label-distort 1s ease-in-out
+.preview-scramble .preview-letter {
+  animation: preview-scramble 0.38s steps(2, end)
     infinite alternate;
 
   animation-delay: calc(var(--i) * -0.1s);
 }
 
-@keyframes label-distort {
-  to {
-    transform: skewX(-13deg) scaleY(1.08);
+@keyframes preview-scramble {
+  50% {
+    transform: skewX(12deg) translateY(-2px);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: skewX(-9deg);
+    opacity: 1;
   }
 }
 
-/* TYPE button preview */
+/* TYPE */
 
 .effect-control:is(:hover, :focus-visible)
 .preview-type .preview-letter {
-  animation: label-type 0.03s both;
+  animation: preview-type 0.03s both;
 
   animation-delay: calc(var(--i) * 0.08s);
 }
 
-@keyframes label-type {
+@keyframes preview-type {
   from {
     opacity: 0;
   }
@@ -393,7 +306,29 @@ button {
 }
 
 /* ======================================
-   RESPONSIVE LAYOUT
+   FLOAT — GRAB AND THROW
+====================================== */
+
+.artwork.mode-float .art-letter {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+
+  -webkit-text-stroke: 0px currentColor;
+  transition: -webkit-text-stroke-width 150ms ease;
+}
+
+.artwork.mode-float .art-letter:hover {
+  -webkit-text-stroke-width: 0.6px;
+}
+
+.artwork.mode-float .art-letter.is-dragging {
+  cursor: grabbing;
+  -webkit-text-stroke-width: 0.8px;
+}
+
+/* ======================================
+   MOBILE
 ====================================== */
 
 @media (max-width: 700px) {
@@ -433,6 +368,7 @@ button {
     animation: none !important;
   }
 
+  .playground-caption,
   .effect-underline {
     transition: none;
   }
