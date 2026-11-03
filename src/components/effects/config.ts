@@ -5,7 +5,7 @@ export type Effect =
   | 'scramble'
   | 'type';
 
-export const WORD = 'TSUNAMI';
+export const WORD = 'TYPOGRAPHY';
 
 export const EFFECTS: {
   id: Effect;

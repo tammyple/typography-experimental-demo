@@ -80,15 +80,22 @@ button {
 
 .artwork {
   display: flex;
-  width: min(100%, 1050px);
 
-  justify-content: space-between;
+  /* The container fits the word,
+     rather than stretching across the page. */
+  width: max-content;
+  max-width: 100%;
+
   align-items: center;
+  justify-content: center;
 
-  margin: 0;
+  /* Keep letters close together. */
+  gap: 0;
+
+  margin: 0 auto;
   color: var(--ink);
 
-  font: 400 clamp(3.4rem, 12.9vw, 12rem)/1
+  font: 400 clamp(2.8rem, 10vw, 10rem)/1
     var(--font-display);
 
   white-space: nowrap;
@@ -96,9 +103,13 @@ button {
 }
 
 .art-letter {
+  position: relative;
   display: inline-block;
   flex: none;
-  position: relative;
+
+  /* Compensate slightly for the fact that
+     each character is in a separate span. */
+  margin-inline: -0.012em;
 
   transform-origin: 50% 50%;
   will-change: transform, opacity;
@@ -107,11 +118,6 @@ button {
 /* ======================================
    TYPE
 ====================================== */
-
-.artwork.mode-type {
-  justify-content: center;
-  gap: 0.025em;
-}
 
 .mode-type .art-letter.typing-current::after {
   content: "";
