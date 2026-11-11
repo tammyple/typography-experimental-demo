@@ -10,14 +10,19 @@ import { attachSweep } from './interactions';
 
 const FIXED_STEP = 1000 / 60;
 
-type Letter = { element: HTMLSpanElement; body: MatterBody };
+type Letter = {
+  element: HTMLSpanElement;
+  body: MatterBody;
+  width: number;
+  height: number;
+};
 
 export type WeightPhysics = {
   restart(): void;
   destroy(): void;
 };
 
-/** Simulate collision boxes; render the actual serif glyphs with HTML. */
+/** Physical rounded rectangles, with real serif glyphs rendered in HTML. */
 export function createWeightPhysics(
   stage: HTMLElement,
   elements: HTMLSpanElement[],
@@ -33,14 +38,27 @@ export function createWeightPhysics(
   let previousWidth = 0;
   let previousHeight = 0;
 
+  function draw() {
+    // Cache letter sizes at spawn time, rather than reading layout
+    // 48 times per frame while we write CSS transforms.
+    for (const { element, body, width, height } of letters) {
+      const x = body.position.x - width / 2;
+      const y = body.position.y - height / 2;
+      element.style.transform =
+        `translate3d(${x}px, ${y}px, 0) rotate(${body.angle}rad)`;
+    }
+  }
+
   function restart() {
     if (destroyed) return;
+
     const width = stage.clientWidth;
     const height = stage.clientHeight;
     if (width < 1 || height < 1) return;
 
     previousWidth = width;
     previousHeight = height;
+
     Composite.clear(engine.world, false);
     Engine.clear(engine);
     engine = Engine.create({ enableSleeping: true });
@@ -53,19 +71,29 @@ export function createWeightPhysics(
     const boundaryOptions = {
       isStatic: true,
       friction: 0.95,
-      restitution: 0.05,
+      restitution: 0.02,
     };
 
-    const boundaries = [
-      Bodies.rectangle(width / 2, floorY + wall / 2, width + wall * 2, wall, boundaryOptions),
-      Bodies.rectangle(-wall / 2, height / 2, wall, height * 5, boundaryOptions),
-      Bodies.rectangle(width + wall / 2, height / 2, wall, height * 5, boundaryOptions),
-    ];
-    Composite.add(engine.world, boundaries);
+    Composite.add(engine.world, [
+      Bodies.rectangle(
+        width / 2, floorY + wall / 2,
+        width + wall * 2, wall, boundaryOptions
+      ),
+      Bodies.rectangle(
+        -wall / 2, height / 2,
+        wall, height * 5, boundaryOptions
+      ),
+      Bodies.rectangle(
+        width + wall / 2, height / 2,
+        wall, height * 5, boundaryOptions
+      ),
+    ]);
 
-    // Distribute all letters across columns, above the stage.
-    // They begin falling together; there is no staggered animation.
-    const largestWidth = Math.max(25, ...elements.map((el) => el.offsetWidth));
+    // Spread the doubled letter set across the top.
+    const largestWidth = Math.max(
+      25,
+      ...elements.map((element) => element.offsetWidth)
+    );
     const columns = Math.max(3, Math.floor(width / (largestWidth * 1.2)));
     const centerGap = width / columns;
 
@@ -77,11 +105,16 @@ export function createWeightPhysics(
       const column = index % columns;
       const row = Math.floor(index / columns);
       const jitter = Math.sin(index * 19.73) * centerGap * 0.13;
+
       const x = Math.max(
         collisionWidth / 2 + 2,
-        Math.min(width - collisionWidth / 2 - 2, (column + 0.5) * centerGap + jitter)
+        Math.min(
+          width - collisionWidth / 2 - 2,
+          (column + 0.5) * centerGap + jitter
+        )
       );
-      const y = -elementHeight * (1.1 + row * 1.22) - (index % 4) * 14;
+      const y =
+        -elementHeight * (1.1 + row * 1.22) - (index % 4) * 14;
 
       const body = Bodies.rectangle(x, y, collisionWidth, collisionHeight, {
         friction: WEIGHT_SETTINGS.friction,
@@ -89,14 +122,27 @@ export function createWeightPhysics(
         frictionAir: WEIGHT_SETTINGS.frictionAir,
         restitution: WEIGHT_SETTINGS.restitution,
         density: WEIGHT_SETTINGS.density,
-        sleepThreshold: 90,
+        sleepThreshold: 75,
         chamfer: { radius: Math.min(7, collisionWidth * 0.1) },
       });
 
       Body.setAngle(body, Math.sin(index * 2.47) * 0.37);
+
+      // Give the letters an immediate downward start.
+      // They still accelerate naturally under gravity afterward.
+      Body.setVelocity(body, {
+        x: Math.sin(index * 3.11) * 0.25,
+        y: 4.2 + (index % 3) * 0.35,
+      });
       Composite.add(engine.world, body);
       element.style.opacity = '1';
-      return { element, body };
+
+      return {
+        element,
+        body,
+        width: elementWidth,
+        height: elementHeight,
+      };
     });
 
     accumulated = 0;
@@ -104,14 +150,13 @@ export function createWeightPhysics(
     draw();
   }
 
-  function draw() {
-    for (const { element, body } of letters) {
-      const x = body.position.x - element.offsetWidth / 2;
-      const y = body.position.y - element.offsetHeight / 2;
-      element.style.transform =
-        `translate3d(${x}px, ${y}px, 0) rotate(${body.angle}rad)`;
-    }
-  }
+  restart();
+
+  const sweep = attachSweep({
+    stage,
+    cursor,
+    getBodies: () => letters.map(({ body }) => body),
+  });
 
   function tick(now: number) {
     if (destroyed) return;
@@ -122,6 +167,9 @@ export function createWeightPhysics(
 
     let steps = 0;
     while (accumulated >= FIXED_STEP && steps < 3) {
+      // Input is applied once for every physics frame.
+      // This prevents high-Hz mice from launching the letters.
+      sweep.step(FIXED_STEP);
       Engine.update(engine, FIXED_STEP);
       accumulated -= FIXED_STEP;
       steps++;
@@ -130,13 +178,6 @@ export function createWeightPhysics(
     draw();
     frame = requestAnimationFrame(tick);
   }
-
-  restart();
-  const detachSweep = attachSweep({
-    stage,
-    cursor,
-    getBodies: () => letters.map((letter) => letter.body),
-  });
 
   const observer = new ResizeObserver(() => {
     const changed =
@@ -147,6 +188,7 @@ export function createWeightPhysics(
     cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(restart);
   });
+
   observer.observe(stage);
   frame = requestAnimationFrame(tick);
 
@@ -158,7 +200,7 @@ export function createWeightPhysics(
       cancelAnimationFrame(frame);
       cancelAnimationFrame(resizeFrame);
       observer.disconnect();
-      detachSweep();
+      sweep.destroy();
       Composite.clear(engine.world, false);
       Engine.clear(engine);
       for (const element of elements) element.style.opacity = '0';
