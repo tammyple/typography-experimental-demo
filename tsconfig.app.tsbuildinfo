@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/spheretopoem.tsx","./src/main.tsx"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/data/experiments.ts","./src/experiments/words-in-motion/effects/config.ts","./src/experiments/words-in-motion/effects/float.ts","./src/experiments/words-in-motion/effects/scramble.ts","./src/experiments/words-in-motion/effects/type.ts","./src/pages/experimentindex.tsx","./src/pages/findingform.tsx","./src/pages/wordsinmotion.tsx"],"version":"5.9.3"}

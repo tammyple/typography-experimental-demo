@@ -14,17 +14,17 @@ import {
     EFFECTS,
     WORD,
     type Effect,
-  } from './effects/config';
+  } from '../experiments/words-in-motion/effects/config';
   
   import {
     startFloat,
     type FloatController,
-  } from './effects/float';
+  } from '../experiments/words-in-motion/effects/float';
   
-  import { playScramble } from './effects/scramble';
-  import { playType } from './effects/type';
+  import { playScramble } from '../experiments/words-in-motion/effects/scramble';
+  import { playType } from '../experiments/words-in-motion/effects/type';
   
-  import '../styles.css';
+  import '../styles/words-in-motion.css';
   
   // ----------------------------------------
   // EFFECT LABELS
@@ -55,7 +55,7 @@ import {
     );
   }
   
-  export default function TypographyPlayground() {
+  export default function WordsInMotion() {
     // ----------------------------------------
     // REACT STATE
     // ----------------------------------------
@@ -312,18 +312,21 @@ import {
       >
         <header className="playground-header">
           <a
-            href="#home"
+            href="#/experiments"
             className="hover:opacity-60"
           >
             TSUNAMI OF WORDS
           </a>
   
           <div className="flex items-center gap-6">
+            <a href="#/experiments" className="hover:underline">
+              INDEX ↗
+            </a>
             <a
-              href="#sphere-poem"
+              href="#/experiments/finding-form"
               className="hover:underline"
             >
-              SPHERE ↘
+              NEXT ↘
             </a>
   
             <button

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import './sphere.css';
+import '../styles/finding-form.css';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -79,11 +79,10 @@ function smoothstep(
   return t * t * (3 - 2 * t);
 }
 
-export default function SphereToPoem() {
+export default function FindingForm() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const finalLayoutRef = useRef<HTMLDivElement>(null);
-  const instructionRef = useRef<HTMLParagraphElement>(null);
 
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const targetRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -92,6 +91,7 @@ export default function SphereToPoem() {
 
   const [reducedMotion, setReducedMotion] = useState(false);
   const [layoutVersion, setLayoutVersion] = useState(0);
+
 
   // ----------------------------------------
   // ACCESSIBILITY
@@ -215,11 +215,6 @@ export default function SphereToPoem() {
 
       if (reducedMotion) {
         gsap.set(words, { opacity: 0 });
-
-        if (instructionRef.current) {
-          instructionRef.current.textContent =
-            'POEM SHOWN WITHOUT ANIMATION';
-        }
 
         return;
       }
@@ -354,30 +349,33 @@ export default function SphereToPoem() {
 
       const trigger = ScrollTrigger.create({
         trigger: section,
-
+      
+        // Start when the sphere reaches the top.
         start: 'top top',
-        end: 'bottom bottom',
-
+      
+        // Give the animation its own scroll distance:
+        // 1.6 times the viewport height.
+        end: () => `+=${Math.round(window.innerHeight * 1.6)}`,
+      
+        // Keep the experiment visible while scrolling.
+        pin: true,
+      
+        // Preserve space so following sections
+        // remain below this experiment.
+        pinSpacing: true,
+      
+        anticipatePin: 1,
         invalidateOnRefresh: true,
-
+      
         onUpdate: (self) => {
-          // Read scroll position.
-          // Don't transform the sphere immediately.
           motion.scroll = self.progress;
         },
-
+      
         onRefresh: (self) => {
           motion.scroll = self.progress;
         },
       });
-
-      motion.scroll = trigger.progress;
-
-      motion.progress = smoothstep(
-        SETTINGS.startGather,
-        SETTINGS.endGather,
-        motion.scroll
-      );
+      
 
       // ------------------------------------
       // 5. FRAME RENDERING
@@ -593,27 +591,6 @@ export default function SphereToPoem() {
                 );
         });
 
-        // --------------------------------
-        // SIMPLE SCROLL INSTRUCTIONS
-        // --------------------------------
-
-        if (instructionRef.current) {
-          let label = 'SCROLL TO FIND THE WORDS ↓';
-
-          if (motion.scroll >= SETTINGS.endGather) {
-            label = 'SCROLL UP TO RELEASE THEM ↑';
-          } else if (
-            motion.scroll >= SETTINGS.startGather
-          ) {
-            label = 'KEEP SCROLLING ↓';
-          }
-
-          if (
-            instructionRef.current.textContent !== label
-          ) {
-            instructionRef.current.textContent = label;
-          }
-        }
       };
 
       gsap.ticker.add(render);
@@ -666,7 +643,7 @@ export default function SphereToPoem() {
           ? ' sphere-reduced-motion'
           : ''
       }`}
-      aria-labelledby="sphere-title"
+      aria-label="Interactive words forming a poem"
     >
       <div className="sphere-shell">
 
@@ -674,10 +651,10 @@ export default function SphereToPoem() {
           <p className="sphere-eyebrow">
             TSUNAMI OF WORDS / EXPERIMENT 002
           </p>
-
-          <h2 id="sphere-title">
-            Help me find the words.
-          </h2>
+          <nav className="sphere-header-links" aria-label="Experiment navigation">
+            <a href="#/experiments/words-in-motion">PREVIOUS ↖</a>
+            <a href="#/experiments">INDEX ↗</a>
+          </nav>
         </header>
 
         <div className="sphere-divider" />
@@ -765,28 +742,6 @@ export default function SphereToPoem() {
         </div>
 
         <div className="sphere-divider" />
-
-        <footer className="sphere-controls">
-          <div>
-            <p className="sphere-eyebrow">
-              THE CREATIVE PROCESS
-            </p>
-
-            <p className="sphere-description">
-              The words are mine. You help them
-              find a shape.
-            </p>
-          </div>
-
-          <p
-            ref={instructionRef}
-            className="sphere-instruction"
-          >
-            {reducedMotion
-              ? 'POEM SHOWN WITHOUT ANIMATION'
-              : 'SCROLL TO FIND THE WORDS ↓'}
-          </p>
-        </footer>
 
       </div>
     </section>
