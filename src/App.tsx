@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ExperimentIndex from './pages/ExperimentIndex';
 import WordsInMotion from './pages/WordsInMotion';
 import FindingForm from './pages/FindingForm';
+import TheWeightOfWords from './pages/TheWeightOfWords';
 
 // Hash routes work without adding a routing dependency.
 // Examples:
@@ -35,6 +36,9 @@ export default function App() {
       break;
     case '/experiments/finding-form':
       page = <FindingForm />;
+      break;
+    case '/experiments/the-weight-of-words':
+      page = <TheWeightOfWords />;
       break;
     default:
       page = <ExperimentIndex />;

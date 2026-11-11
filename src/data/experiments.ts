@@ -17,8 +17,8 @@ export const experiments = [
     id: '003',
     slug: 'the-weight-of-words',
     title: 'The Weight of Words',
-    description: 'Gravity, collisions and resistance.',
-    available: false,
+    description: 'Sweep letters through gravity, collisions and resistance.',
+    available: true,
   },
 ] as const;
 
