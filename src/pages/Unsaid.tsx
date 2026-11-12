@@ -190,10 +190,10 @@ export default function Unsaid() {
 
   return (
     <section className="unsaid-page" aria-label="Experiment 004: Unsaid">
-      <header className="unsaid-header">
-        <a href="#/experiments" className="unsaid-brand">TSUNAMI OF WORDS</a>
-        <span className="unsaid-header-number">EXPERIMENT 004 / UNSAID</span>
-        <a href="#/experiments" className="unsaid-nav-link">INDEX ↗</a>
+      <header className="experiment-header">
+        <a className="experiment-header-brand" href="#/experiments">TSUNAMI OF WORDS</a>
+        <span className="experiment-header-title">EXPERIMENT 004 / UNSAID</span>
+        <nav className="experiment-header-nav" aria-label="Experiment navigation"><a href="#/experiments">INDEX ↗</a></nav>
       </header>
 
       <div className="unsaid-rule" aria-hidden="true" />

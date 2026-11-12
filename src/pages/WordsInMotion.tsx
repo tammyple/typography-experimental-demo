@@ -310,36 +310,16 @@ import {
         className="playground-screen"
         aria-label="Tsunami of Words typography playground"
       >
-        <header className="playground-header">
-          <a
-            href="#/experiments"
-            className="hover:opacity-60"
-          >
-            TSUNAMI OF WORDS
-          </a>
-  
-          <div className="flex items-center gap-6">
-            <a href="#/experiments" className="hover:underline">
-              INDEX ↗
-            </a>
-            <a
-              href="#/experiments/finding-form"
-              className="hover:underline"
-            >
-              NEXT ↘
-            </a>
-  
-            <button
-              type="button"
-              onClick={() => setAboutOpen(true)}
-              className="cursor-pointer hover:opacity-60"
-            >
-              ABOUT ↗
-            </button>
-          </div>
+        <header className="experiment-header">
+          <a className="experiment-header-brand" href="#/experiments">TSUNAMI OF WORDS</a>
+          <span className="experiment-header-title">EXPERIMENT 001 / WORDS IN MOTION</span>
+          <nav className="experiment-header-nav" aria-label="Experiment navigation">
+            <a href="#/experiments">INDEX ↗</a>
+            <a href="#/experiments/finding-form">NEXT ↘</a>
+            <button type="button" onClick={() => setAboutOpen(true)} className="cursor-pointer hover:opacity-60">ABOUT ↗</button>
+          </nav>
         </header>
-  
-        {/* First horizontal divider */}
+
         <div className="playground-divider" />
   
         {/* Typography animation stage */}

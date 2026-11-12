@@ -347,35 +347,20 @@ export default function FindingForm() {
       // 4. SCROLLTRIGGER
       // ------------------------------------
 
+      // The tall section already contains a sticky, viewport-height shell.
+      // Track its natural scroll distance instead of pinning it again.
       const trigger = ScrollTrigger.create({
         trigger: section,
-      
-        // Start when the sphere reaches the top.
         start: 'top top',
-      
-        // Give the animation its own scroll distance:
-        // 1.6 times the viewport height.
-        end: () => `+=${Math.round(window.innerHeight * 1.6)}`,
-      
-        // Keep the experiment visible while scrolling.
-        pin: true,
-      
-        // Preserve space so following sections
-        // remain below this experiment.
-        pinSpacing: true,
-      
-        anticipatePin: 1,
+        end: 'bottom bottom',
         invalidateOnRefresh: true,
-      
         onUpdate: (self) => {
           motion.scroll = self.progress;
         },
-      
         onRefresh: (self) => {
           motion.scroll = self.progress;
         },
       });
-      
 
       // ------------------------------------
       // 5. FRAME RENDERING
@@ -647,12 +632,14 @@ export default function FindingForm() {
     >
       <div className="sphere-shell">
 
-        <header className="sphere-heading">
-          <p className="sphere-eyebrow">
-            TSUNAMI OF WORDS / EXPERIMENT 002
-          </p>
-          <nav className="sphere-header-links" aria-label="Experiment navigation">
-            <a href="#/experiments/words-in-motion">PREVIOUS ↖</a>
+        <header className="sphere-heading experiment-header">
+          <a className="experiment-header-brand" href="#/experiments">
+            TSUNAMI OF WORDS
+          </a>
+          <span className="experiment-header-title">
+            EXPERIMENT 002 / FINDING FORM
+          </span>
+          <nav className="experiment-header-nav" aria-label="Experiment navigation">
             <a href="#/experiments">INDEX ↗</a>
           </nav>
         </header>

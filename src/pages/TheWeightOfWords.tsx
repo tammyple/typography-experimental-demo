@@ -53,10 +53,10 @@ export default function TheWeightOfWords() {
 
   return (
     <section className="weight-page" aria-label="Experiment 003: The Weight of Words">
-      <header className="weight-header">
-        <a href="#/experiments" className="weight-brand">TSUNAMI OF WORDS</a>
-        <span className="weight-index-label">EXPERIMENT 003 / THE WEIGHT OF WORDS</span>
-        <a href="#/experiments" className="weight-link">INDEX ↗</a>
+      <header className="experiment-header">
+        <a className="experiment-header-brand" href="#/experiments">TSUNAMI OF WORDS</a>
+        <span className="experiment-header-title">EXPERIMENT 003 / THE WEIGHT OF WORDS</span>
+        <nav className="experiment-header-nav" aria-label="Experiment navigation"><a href="#/experiments">INDEX ↗</a></nav>
       </header>
 
       <div className="weight-rule" aria-hidden="true" />

@@ -5,7 +5,7 @@
 
 .sphere-experiment {
   position: relative;
-  height: 290svh;
+  height: 240svh;
   background: #f3f1ec;
   color: #171717;
 }
@@ -294,29 +294,5 @@
   }
 }
 
-/* Menu access from experiment 002 */
-.sphere-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.sphere-header-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(12px, 2vw, 28px);
-  font: 400 0.68rem/1.3 Arial, sans-serif;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-.sphere-header-links a {
-  color: inherit;
-  text-decoration: none;
-}
-.sphere-header-links a:hover,
-.sphere-header-links a:focus-visible {
-  text-decoration: underline;
-}
-@media (max-width: 520px) {
-  .sphere-header-links a:first-child { display: none; }
-}
+/* Shared experiment header overrides */
+.sphere-heading { min-height: 25px; }
