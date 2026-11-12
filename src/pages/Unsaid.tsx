@@ -1,16 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ERASURE } from '../experiments/unsaid/config';
-import { createEraseMask, type Point } from '../experiments/unsaid/mask';
+import { createVaporMask, type Point } from '../experiments/unsaid/mask';
 import { paintForeground } from '../experiments/unsaid/typography';
 import '../styles/unsaid.css';
 
-type ErasureController = { reset(): void };
-
+/** Experiment 004 — moving the pointer reveals a temporary vapour opening. */
 export default function Unsaid() {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const brushRef = useRef<HTMLDivElement>(null);
-  const controllerRef = useRef<ErasureController | null>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
 
   const [reducedMotion, setReducedMotion] = useState(() =>
     typeof window !== 'undefined' &&
@@ -25,175 +23,168 @@ export default function Unsaid() {
   }, []);
 
   useLayoutEffect(() => {
-    const stage = stageRef.current;
-    const canvas = canvasRef.current;
-    const brush = brushRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!stage || !canvas || !brush || !ctx) return;
+    const stageElement = stageRef.current;
+    const canvasElement = canvasRef.current;
+    const cursorElement = cursorRef.current;
+    const context = canvasElement?.getContext('2d');
+    if (!stageElement || !canvasElement || !cursorElement || !context) return;
 
-    const mask = createEraseMask();
+    // Non-null aliases for the event and animation callbacks below.
+    const stage: HTMLDivElement = stageElement;
+    const canvas: HTMLCanvasElement = canvasElement;
+    const cursor: HTMLDivElement = cursorElement;
+    const ctx: CanvasRenderingContext2D = context;
+
+    const mask = createVaporMask(reducedMotion);
     let width = 1;
     let height = 1;
     let dpr = 1;
     let raf = 0;
     let startTime = 0;
-    let lastTime = 0;
-    let activePointer: number | null = null;
-    let previous: Point | null = null;
+    let visible = true;
+
+    let previousMouse: Point | null = null;
     let previousTime = 0;
-    let currentRadius: number = ERASURE.brushRadius;
-    let isVisible = true;
+    let activeTouch: number | null = null;
 
-    function draw(timestamp = lastTime) {
-      lastTime = timestamp;
+    const getPoint = (event: PointerEvent): Point => {
+      const rect = stage.getBoundingClientRect();
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+      };
+    };
+
+    function paint(timestamp: number) {
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const elapsed = reducedMotion
+      const elapsed = reducedMotion || !startTime
         ? 0
-        : (timestamp - startTime) / 1000;
-
+        : Math.max(0, timestamp - startTime) / 1000;
       paintForeground(ctx!, width, height, elapsed);
       mask.composite(ctx!, width, height, timestamp);
     }
 
     function resize() {
-      const nextWidth = Math.max(1, stage!.clientWidth);
-      const nextHeight = Math.max(1, stage!.clientHeight);
-      const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.max(1, stage.clientWidth);
+      const h = Math.max(1, stage.clientHeight);
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      if (w === width && h === height && ratio === dpr) return;
 
-      if (
-        nextWidth === width &&
-        nextHeight === height &&
-        nextDpr === dpr
-      ) return;
-
-      width = nextWidth;
-      height = nextHeight;
-      dpr = nextDpr;
-      currentRadius = Math.min(
-        ERASURE.brushRadius,
-        Math.max(34, width * 0.12)
-      );
-
+      width = w;
+      height = h;
+      dpr = ratio;
       canvas!.width = Math.round(width * dpr);
       canvas!.height = Math.round(height * dpr);
-      mask.resize(width, height, dpr);
-      brush!.style.width = `${currentRadius * 2}px`;
-      brush!.style.height = `${currentRadius * 2}px`;
-      draw();
+      mask.resize(width, height);
+      paint(performance.now());
     }
 
-    function getPoint(event: PointerEvent): Point {
-      const rect = stage!.getBoundingClientRect();
-      return {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
+    function moveCursor(point: Point) {
+      cursor!.style.left = `${point.x}px`;
+      cursor!.style.top = `${point.y}px`;
     }
 
-    function setBrushPosition(point: Point) {
-      brush!.style.left = `${point.x}px`;
-      brush!.style.top = `${point.y}px`;
-    }
-
-    function onPointerEnter(event: PointerEvent) {
+    function startMouse(event: PointerEvent) {
       if (event.pointerType === 'touch') return;
-      stage!.classList.add('is-hovered');
-      setBrushPosition(getPoint(event));
-    }
-
-    function onPointerDown(event: PointerEvent) {
-      if (activePointer !== null) return;
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-      event.preventDefault();
-      activePointer = event.pointerId;
-      previous = getPoint(event);
-      previousTime = performance.now();
-      stage!.setPointerCapture(event.pointerId);
-      stage!.classList.add('is-erasing');
-      setBrushPosition(previous);
-      const now = performance.now();
-      mask.dab(previous, currentRadius, now, reducedMotion);
-      draw(now);
-    }
-
-    function onPointerMove(event: PointerEvent) {
       const point = getPoint(event);
-      if (event.pointerType !== 'touch') setBrushPosition(point);
-      if (activePointer !== event.pointerId || !previous) return;
-
+      stage.classList.add('is-hovered');
+      moveCursor(point);
       const now = performance.now();
-      const deltaMs = Math.max(8, now - previousTime);
-      const distance = Math.hypot(
-        point.x - previous.x,
-        point.y - previous.y
-      );
-      const speed = (distance / deltaMs) * 1000;
-
-      mask.stroke(previous, point, currentRadius, speed, now, reducedMotion);
-      previous = point;
+      previousMouse = point;
       previousTime = now;
-      draw(now);
+      mask.emit(point, now);
     }
 
-    function onPointerUp(event: PointerEvent) {
-      if (activePointer !== event.pointerId) return;
-      activePointer = null;
-      previous = null;
-      stage!.classList.remove('is-erasing');
-      if (stage!.hasPointerCapture(event.pointerId)) {
-        stage!.releasePointerCapture(event.pointerId);
+    function movePointer(event: PointerEvent) {
+      const isTouch = event.pointerType === 'touch';
+      if (isTouch && activeTouch !== event.pointerId) return;
+
+      const point = getPoint(event);
+      if (!isTouch) {
+        stage.classList.add('is-hovered');
+        moveCursor(point);
+      }
+
+      const now = performance.now();
+      const previous = previousMouse;
+      if (previous) {
+        const dt = Math.max(8, now - previousTime);
+        const velocity = {
+          x: ((point.x - previous.x) / dt) * 1000,
+          y: ((point.y - previous.y) / dt) * 1000,
+        };
+        mask.move(previous, point, now, velocity);
+      } else {
+        mask.emit(point, now);
+      }
+
+      previousMouse = point;
+      previousTime = now;
+    }
+
+    // Touch devices don't have hover; they reveal as the finger moves.
+    function onPointerDown(event: PointerEvent) {
+      if (event.pointerType !== 'touch') return;
+      if (activeTouch !== null) return;
+      event.preventDefault();
+      activeTouch = event.pointerId;
+      stage.setPointerCapture(event.pointerId);
+      previousMouse = getPoint(event);
+      previousTime = performance.now();
+      mask.emit(previousMouse, previousTime);
+    }
+
+    function endTouch(event: PointerEvent) {
+      if (activeTouch !== event.pointerId) return;
+      activeTouch = null;
+      previousMouse = null;
+      if (stage.hasPointerCapture(event.pointerId)) {
+        stage.releasePointerCapture(event.pointerId);
       }
     }
 
-    function onPointerLeave() {
-      if (activePointer === null) stage!.classList.remove('is-hovered');
+    function leavePointer(event: PointerEvent) {
+      if (event.pointerType === 'touch') return;
+      stage.classList.remove('is-hovered');
+      previousMouse = null;
     }
 
     function tick(timestamp: number) {
       if (!startTime) startTime = timestamp;
-      if (isVisible) draw(timestamp);
+      if (visible) paint(timestamp);
       raf = requestAnimationFrame(tick);
     }
 
-    controllerRef.current = {
-      reset() {
-        mask.clear();
-        draw();
-      },
-    };
-
-    stage.addEventListener('pointerenter', onPointerEnter);
+    stage.addEventListener('pointerenter', startMouse);
+    stage.addEventListener('pointermove', movePointer);
+    stage.addEventListener('pointerleave', leavePointer);
     stage.addEventListener('pointerdown', onPointerDown);
-    stage.addEventListener('pointermove', onPointerMove);
-    stage.addEventListener('pointerup', onPointerUp);
-    stage.addEventListener('pointercancel', onPointerUp);
-    stage.addEventListener('pointerleave', onPointerLeave);
+    stage.addEventListener('pointerup', endTouch);
+    stage.addEventListener('pointercancel', endTouch);
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(stage);
     const intersectionObserver = new IntersectionObserver(([entry]) => {
-      isVisible = entry.isIntersecting;
+      visible = entry.isIntersecting;
     });
     intersectionObserver.observe(stage);
 
     resize();
-    if (!reducedMotion) raf = requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      stage.removeEventListener('pointerenter', onPointerEnter);
+      stage.removeEventListener('pointerenter', startMouse);
+      stage.removeEventListener('pointermove', movePointer);
+      stage.removeEventListener('pointerleave', leavePointer);
       stage.removeEventListener('pointerdown', onPointerDown);
-      stage.removeEventListener('pointermove', onPointerMove);
-      stage.removeEventListener('pointerup', onPointerUp);
-      stage.removeEventListener('pointercancel', onPointerUp);
-      stage.removeEventListener('pointerleave', onPointerLeave);
-      if (activePointer !== null && stage.hasPointerCapture(activePointer)) {
-        stage.releasePointerCapture(activePointer);
+      stage.removeEventListener('pointerup', endTouch);
+      stage.removeEventListener('pointercancel', endTouch);
+      if (activeTouch !== null && stage.hasPointerCapture(activeTouch)) {
+        stage.releasePointerCapture(activeTouch);
       }
-      controllerRef.current = null;
     };
   }, [reducedMotion]);
 
@@ -210,7 +201,7 @@ export default function Unsaid() {
       <div
         className="unsaid-stage"
         ref={stageRef}
-        aria-label={`Drag to remove repeated words and reveal ${ERASURE.revealedText}`}
+        aria-label={`Move your pointer to temporarily reveal ${ERASURE.revealedText}`}
       >
         <div className="unsaid-hidden-layer" aria-hidden="true">
           <div className="unsaid-big-type">
@@ -219,26 +210,24 @@ export default function Unsaid() {
           </div>
         </div>
         <canvas className="unsaid-foreground" ref={canvasRef} aria-hidden="true" />
-        <div className="unsaid-brush" ref={brushRef} aria-hidden="true" />
+        <div
+          className="unsaid-brush"
+          ref={cursorRef}
+          style={{ width: ERASURE.cursorDiameter, height: ERASURE.cursorDiameter }}
+          aria-hidden="true"
+        />
       </div>
 
       <footer className="unsaid-footer">
-        <span className="unsaid-instruction">DRAG TO DISSOLVE</span>
-        <div className="unsaid-footer-actions">
-          <a href="#/experiments/the-weight-of-words" className="unsaid-previous">
-            ← PREVIOUS
-          </a>
-          <button
-            type="button"
-            className="unsaid-reset"
-            onClick={() => controllerRef.current?.reset()}
-          >
-            START AGAIN ↻
-          </button>
-        </div>
+        <span className="unsaid-instruction">MOVE TO REVEAL · WATCH IT FADE</span>
+        <a href="#/experiments/the-weight-of-words" className="unsaid-previous">
+          ← PREVIOUS
+        </a>
       </footer>
       <p className="unsaid-sr-only">
-        The repeated phrase is “{ERASURE.repeatedText}”. Erasing reveals “{ERASURE.revealedText}”.
+        The repeated phrase is “{ERASURE.repeatedText}”. Moving the pointer
+        temporarily reveals “{ERASURE.revealedText}”. The surface returns
+        automatically when you stop moving.
       </p>
     </section>
   );

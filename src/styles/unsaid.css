@@ -117,21 +117,20 @@
   top: -1000px;
   left: -1000px;
   z-index: 2;
+  width: 36px;
+  height: 36px;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(23, 23, 23, 0.27);
-  background: rgba(218, 219, 215, 0.12);
-  border-radius: 48% 52% 57% 43% / 43% 58% 42% 57%;
+  border: 1px solid rgba(23, 23, 23, 0.4);
+  border-radius: 50%;
+  background: transparent;
+  box-sizing: border-box;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 180ms ease, border-radius 350ms ease;
+  transition: opacity 160ms ease;
 }
 
 .unsaid-stage.is-hovered { cursor: none; }
 .unsaid-stage.is-hovered .unsaid-brush { opacity: 1; }
-.unsaid-stage.is-erasing .unsaid-brush {
-  border-radius: 56% 44% 44% 56% / 50% 43% 57% 50%;
-  background: rgba(218, 219, 215, 0.18);
-}
 
 .unsaid-footer {
   flex: none;
@@ -146,20 +145,7 @@
 }
 
 .unsaid-instruction { color: #77746d; }
-.unsaid-footer-actions { display: flex; gap: clamp(18px, 2.8vw, 40px); align-items: center; }
 .unsaid-previous { color: #77746d !important; }
-.unsaid-reset {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 10px 0;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  cursor: pointer;
-}
-.unsaid-reset:hover { opacity: 0.55; }
-.unsaid-reset:focus-visible,
 .unsaid-header a:focus-visible,
 .unsaid-footer a:focus-visible {
   outline: 2px solid currentColor;
@@ -187,6 +173,7 @@
   .unsaid-big-type-lead { font-size: clamp(1.5rem, 6vw, 3.2rem); }
   .unsaid-footer { min-height: 70px; font-size: 10px; }
   .unsaid-previous { display: none; }
+  .unsaid-instruction { font-size: 9px; }
 }
 
 @media (hover: none) {
