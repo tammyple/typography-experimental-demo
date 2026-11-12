@@ -3,6 +3,7 @@ import ExperimentIndex from './pages/ExperimentIndex';
 import WordsInMotion from './pages/WordsInMotion';
 import FindingForm from './pages/FindingForm';
 import TheWeightOfWords from './pages/TheWeightOfWords';
+import Unsaid from './pages/Unsaid';
 
 // Hash routes work without adding a routing dependency.
 // Examples:
@@ -39,6 +40,9 @@ export default function App() {
       break;
     case '/experiments/the-weight-of-words':
       page = <TheWeightOfWords />;
+      break;
+    case '/experiments/unsaid':
+      page = <Unsaid />;
       break;
     default:
       page = <ExperimentIndex />;

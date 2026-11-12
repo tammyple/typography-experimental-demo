@@ -20,6 +20,13 @@ export const experiments = [
     description: 'Sweep letters through gravity, collisions and resistance.',
     available: true,
   },
+  {
+    id: '004',
+    slug: 'unsaid',
+    title: 'Unsaid',
+    description: 'Erase a repeated phrase. Reveal what it refuses to say.',
+    available: true,
+  },
 ] as const;
 
 export const experimentUrl = (slug: string) =>
