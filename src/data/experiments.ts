@@ -27,6 +27,13 @@ export const experiments = [
     description: 'Erase a repeated phrase. Reveal what it refuses to say.',
     available: true,
   },
+  {
+    id: '005',
+    slug: 'submerged',
+    title: 'Submerged',
+    description: 'Bend and magnify words through a lens of moving water.',
+    available: true,
+  },
 ] as const;
 
 export const experimentUrl = (slug: string) =>
