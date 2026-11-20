@@ -1,5 +1,15 @@
 import { ERASURE } from './config';
 
+let headingFontStack: string | undefined;
+function getHeadingFontStack(): string {
+  if (headingFontStack === undefined) {
+    headingFontStack = getComputedStyle(document.documentElement)
+      .getPropertyValue('--font-heading').trim() || '"Arial Narrow", sans-serif';
+  }
+  return headingFontStack;
+}
+
+
 /** Paint the opaque foreground, including continuously moving type rows. */
 export function paintForeground(
   ctx: CanvasRenderingContext2D,
@@ -15,7 +25,7 @@ export function paintForeground(
   const rowHeight = Math.max(35, size * 2.45);
   const rows = Math.ceil(height / rowHeight) + 1;
 
-  ctx.font = `600 ${size}px "Arial Narrow", "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `600 ${size}px ${getHeadingFontStack()}`;
   ctx.textBaseline = 'middle';
   ctx.fillStyle = ERASURE.ink;
 

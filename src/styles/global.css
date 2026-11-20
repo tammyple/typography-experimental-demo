@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Baskervville:ital,wght@0,400..700;1,400..700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -6,44 +6,19 @@
   --ink: #171717;
   --line: #b9b6ae;
 
-  --font-display: "Fraunces", serif;
-  --font-ui: Inter, Arial, sans-serif;
+  /* Futura PT Condensed needs an Adobe Fonts Web Project to load on visitors' devices. */
+  --font-heading: "futura-pt-condensed", "Futura PT Condensed", "Futura PT Cond", Futura, "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-body: "Inter Tight Variable", "Inter Tight", Inter, system-ui, sans-serif;
 
+  /* Backward-compatible aliases for existing experiment styles. */
+  --font-display: var(--font-heading);
+  --font-ui: var(--font-body);
+
+  font-family: var(--font-body);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
 
-html {
-  scroll-behavior: auto;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  background: var(--canvas);
-}
-
-button {
-  font: inherit;
-}
-
-
-/* Consistent navigation across the experiment collection */
-.experiment-header {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
-  align-items: center;
-  gap: 18px;
-  font: 400 clamp(12px, 1vw, 15px)/1.4 var(--font-ui, Arial, sans-serif);
-  letter-spacing: .02em;
-}
-.experiment-header-brand { justify-self: start; color: inherit; text-decoration: none; white-space: nowrap; }
-.experiment-header-title { justify-self: center; color: #77746d; font-size: .73em; letter-spacing: .08em; text-align: center; }
-.experiment-header-nav { justify-self: end; display: flex; align-items: center; gap: clamp(12px, 2vw, 28px); white-space: nowrap; }
-.experiment-header-nav a { color: inherit; text-decoration: none; }
-.experiment-header a:hover { opacity: .55; }
-.experiment-header a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
-@media (max-width: 700px) {
-  .experiment-header { grid-template-columns: 1fr auto !important; }
-  .experiment-header-title { display: none; }
-}
+html { scroll-behavior: auto; }
+body { margin: 0; min-width: 320px; background: var(--canvas); font-family: var(--font-body); }
+button { font: inherit; }

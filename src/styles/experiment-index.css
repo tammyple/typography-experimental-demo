@@ -25,9 +25,9 @@
   max-width: 100%;
   margin: 0;
   color: #171717;
-  font-family: 'Bodoni Moda', Georgia, serif;
+  font-family: var(--font-heading);
   font-size: clamp(4.5rem, 8.2vw, 10.5rem);
-  font-weight: 550;
+  font-weight: 600;
   line-height: .95;
   letter-spacing: -0.035em;
   text-align: center;
@@ -130,13 +130,13 @@
 .experiment-index-number,
 .experiment-index-arrow {
   color: #77746d;
-  font: 400 clamp(11px, 1vw, 14px)/1.3 Inter, Arial, sans-serif;
+  font: 400 clamp(11px, 1vw, 14px)/1.3 var(--font-body);
 }
 .experiment-index-arrow { text-align: right; }
 .experiment-index-title {
   min-width: 0;
   font: 400 clamp(1.65rem, 2.8vw, 3.15rem)/1.05
-    'Bodoni Moda', Georgia, serif;
+    var(--font-heading);
   letter-spacing: -0.022em;
   transition: transform 240ms ease;
 }

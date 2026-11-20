@@ -22,18 +22,24 @@ export default function ExperimentNavigation({ slug }: Props) {
           <a href={experimentUrl(previous.slug)}
              className="experiment-navigation__link"
              aria-label={`Previous experiment: ${previous.title}`}>
-            <span aria-hidden="true">←</span> PREVIOUS
+            PREVIOUS
           </a>
         )}
       </div>
 
 
       <div className="experiment-navigation__right">
-        {next && (
+        {next ? (
           <a href={experimentUrl(next.slug)}
              className="experiment-navigation__link"
              aria-label={`Next experiment: ${next.title}`}>
-            NEXT <span aria-hidden="true">→</span>
+            NEXT
+          </a>
+        ) : (
+          <a href="#/experiments"
+             className="experiment-navigation__link"
+             aria-label="Back to Home, all experiments">
+            HOME
           </a>
         )}
       </div>

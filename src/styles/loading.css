@@ -14,7 +14,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  font: 500 clamp(7rem, 24vw, 25rem)/0.85 Inter, Arial, sans-serif;
+  font: 500 clamp(7rem, 24vw, 25rem)/0.85 var(--font-body);
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.075em;
   white-space: nowrap;

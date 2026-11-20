@@ -9,7 +9,7 @@ type SiteMenuProps = {
 
 // Add your real public email when you're ready to receive messages.
 // Until then the Contact panel is informational, not a fake email link.
-const CONTACT_EMAIL = '';
+const CONTACT_EMAIL = 'tammy.thanhple@gmail.com';
 
 export default function SiteMenu({ route }: SiteMenuProps) {
   const [open, setOpen] = useState(false);
@@ -111,7 +111,6 @@ export default function SiteMenu({ route }: SiteMenuProps) {
           >
             <span className="site-menu__dot" aria-hidden="true" />
             <span>Home</span>
-            <span className="site-menu__arrow" aria-hidden="true">↗</span>
           </a>
           <button
             type="button"
@@ -121,7 +120,6 @@ export default function SiteMenu({ route }: SiteMenuProps) {
           >
             <span className="site-menu__dot" aria-hidden="true" />
             <span>About</span>
-            <span className="site-menu__arrow" aria-hidden="true">↗</span>
           </button>
           <button
             type="button"
@@ -131,7 +129,6 @@ export default function SiteMenu({ route }: SiteMenuProps) {
           >
             <span className="site-menu__dot" aria-hidden="true" />
             <span>Contact</span>
-            <span className="site-menu__arrow" aria-hidden="true">↗</span>
           </button>
         </nav>
       </div>

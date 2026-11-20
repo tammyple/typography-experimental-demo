@@ -1,5 +1,15 @@
 import { SUBMERGED } from './config';
 
+let headingFontStack: string | undefined;
+function getHeadingFontStack(): string {
+  if (headingFontStack === undefined) {
+    headingFontStack = getComputedStyle(document.documentElement)
+      .getPropertyValue('--font-heading').trim() || '"Arial Narrow", sans-serif';
+  }
+  return headingFontStack;
+}
+
+
 /** Paint a sharp, static typography texture once on resize/font load. The lens bends this image on the GPU. */
 export function drawTypography(
   ctx: CanvasRenderingContext2D,
@@ -40,7 +50,7 @@ export function drawTypography(
   rows.forEach((word, index) => {
     ctx.save();
     const weight = index === 1 ? 400 : 600;
-    ctx.font = `${weight} ${fontSize}px "Bodoni Moda", Georgia, serif`;
+    ctx.font = `${weight} ${fontSize}px ${getHeadingFontStack()}`;
     const measured = Math.max(1, ctx.measureText(word).width);
     const scale = Math.min(1.05, (w * 0.86) / measured);
     ctx.translate(w / 2, h * positions[index]);

@@ -45,15 +45,33 @@
 }
 
 .unsaid-big-type {
-  display: block;
-  max-width: 96%;
-  white-space: nowrap;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 2%;
   text-align: center;
-  font: 600 clamp(4.2rem, 16.8vw, 17rem)/0.87 Georgia, 'Times New Roman', serif;
-  letter-spacing: -0.077em;
   color: #b63724;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  /* Size scales with viewport; no more 16.8vw oversized overflow. */
+  font-size: clamp(2rem, 9vw, 9.5rem);
+  line-height: 0.94;
+  letter-spacing: 0.005em;
   user-select: none;
 }
+
+.unsaid-big-type-lead,
+.unsaid-big-type-main {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+}
+.unsaid-big-type-lead { font-size: 0.8em; }
+.unsaid-big-type-main { font-size: 1em; }
 
 .unsaid-foreground {
   display: block;
@@ -97,7 +115,7 @@
   .unsaid-header { grid-template-columns: 1fr auto; }
   .unsaid-header-number { display: none; }
   .unsaid-rule { margin-top: 24px; }
-  .unsaid-big-type { font-size: clamp(3.9rem, 16.8vw, 8rem); }
+  .unsaid-big-type { font-size: clamp(1.8rem, 8.6vw, 5.25rem); }
 }
 
 @media (hover: none) {
