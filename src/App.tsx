@@ -45,7 +45,11 @@ function Page({ route, introPhase }: { route: string; introPhase: IntroPhase }) 
 
 export default function App() {
   const [route, setRoute] = useState(readRoute);
-  const [introPhase, setIntroPhase] = useState<IntroPhase>('counting');
+  // Show the intro only when the site first loads on Home.
+  // A direct visit or refresh on an experiment opens it immediately.
+  const [introPhase, setIntroPhase] = useState<IntroPhase>(() =>
+    readRoute() === '/experiments' ? 'counting' : 'ready'
+  );
   const [slide, setSlide] = useState<Slide | null>(null);
   const currentRouteRef = useRef(route);
   const slideRef = useRef<Slide | null>(null);
