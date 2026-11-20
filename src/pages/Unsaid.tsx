@@ -218,9 +218,6 @@ export default function Unsaid() {
         />
       </div>
 
-      <footer className="unsaid-footer">
-        <span className="unsaid-instruction">MOVE TO REVEAL · WATCH IT FADE</span>
-      </footer>
       <p className="unsaid-sr-only">
         The repeated phrase is “{ERASURE.repeatedText}”. Moving the pointer
         temporarily reveals “{ERASURE.revealedText}”. The surface returns

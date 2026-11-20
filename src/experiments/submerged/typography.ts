@@ -49,21 +49,4 @@ export function drawTypography(
     ctx.fillText(word, 0, 0);
     ctx.restore();
   });
-
-  // Small technical annotations provide another typographic scale.
-  ctx.save();
-  const side = Math.max(16, Math.min(34, w * 0.035));
-  const bottom = h - Math.max(20, Math.min(34, h * 0.05));
-  ctx.fillStyle = SUBMERGED.accent;
-  ctx.font = `500 10px Arial, sans-serif`;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
-  if (w >= 520) {
-    ctx.fillText('A STUDY OF REFRACTION', side, 32);
-    ctx.fillText('WHAT YOU SEE IS NOT WHAT STAYS', side, bottom);
-    ctx.textAlign = 'right';
-    ctx.fillText('005 / SUBMERGED', w - side, 32);
-    ctx.fillText('MOVE THE SURFACE', w - side, bottom);
-  }
-  ctx.restore();
 }

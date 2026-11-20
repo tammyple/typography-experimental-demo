@@ -722,11 +722,6 @@ export default function FindingForm() {
             ))}
           </div>
 
-          {!reducedMotion && (
-            <p className="sphere-pointer-hint">
-              MOVE YOUR CURSOR TO EXPLORE THE WORDS
-            </p>
-          )}
         </div>
 
       </div>

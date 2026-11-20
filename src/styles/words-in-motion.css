@@ -125,33 +125,6 @@
   align-items: center;
 }
 
-.playground-mode,
-.playground-caption {
-  color: #77746d;
-
-  font: 400 clamp(11px, 1vw, 15px)/1.3
-    var(--font-ui);
-
-  text-align: center;
-}
-
-.playground-mode {
-  margin: 0 0 12px;
-  letter-spacing: 0.06em;
-}
-
-/* The space stays reserved when the hint fades. */
-.playground-caption {
-  margin: 20px 0 0;
-  min-height: 1.3em;
-
-  opacity: 0;
-  transition: opacity 500ms ease;
-}
-
-.playground-caption.is-visible {
-  opacity: 1;
-}
 
 /* ======================================
    EFFECT CONTROLS
@@ -364,3 +337,8 @@
     transition: none;
   }
 }
+
+/* Keep the mode controls above the shared bottom experiment navigation. */
+.playground-screen { padding-bottom: clamp(86px, 10vh, 118px); }
+.playground-divider { margin-top: 0; }
+@media (max-width: 700px) { .playground-screen { padding-bottom: 74px; } }

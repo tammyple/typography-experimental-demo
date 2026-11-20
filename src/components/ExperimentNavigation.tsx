@@ -10,7 +10,6 @@ export default function ExperimentNavigation({ slug }: Props) {
   const currentIndex = experiments.findIndex((item) => item.slug === slug);
   if (currentIndex < 0) return null;
 
-  const current = experiments[currentIndex];
   const previous = currentIndex > 0 ? experiments[currentIndex - 1] : null;
   const next = currentIndex < experiments.length - 1
     ? experiments[currentIndex + 1]
@@ -28,14 +27,6 @@ export default function ExperimentNavigation({ slug }: Props) {
         )}
       </div>
 
-      <a
-        className="experiment-navigation__home"
-        href="#/experiments"
-        aria-label="Return to all experiments"
-        title="All experiments"
-      >
-        {current.id} / {String(experiments.length).padStart(3, '0')}
-      </a>
 
       <div className="experiment-navigation__right">
         {next && (

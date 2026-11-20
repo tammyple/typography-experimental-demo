@@ -1,7 +1,5 @@
 
 import {
-    useCallback,
-    useEffect,
     useLayoutEffect,
     useRef,
     useState,
@@ -68,13 +66,6 @@ import {
     const [isReturning, setIsReturning] =
       useState(false);
   
-    const [hint, setHint] = useState(
-      'Choose an effect to bring the words to life.'
-    );
-  
-    const [hintVisible, setHintVisible] =
-      useState(true);
-  
     // ----------------------------------------
     // ELEMENT REFERENCES
     // ----------------------------------------
@@ -89,43 +80,6 @@ import {
       useRef<FloatController | null>(null);
   
     const transitioningRef = useRef(false);
-  
-    const hintTimerRef =
-      useRef<number | null>(null);
-  
-    // ----------------------------------------
-    // CONTEXTUAL INSTRUCTIONS
-    // ----------------------------------------
-  
-    const showHint = useCallback(
-      (message: string, duration = 3000) => {
-        if (hintTimerRef.current !== null) {
-          window.clearTimeout(hintTimerRef.current);
-        }
-  
-        setHint(message);
-        setHintVisible(true);
-  
-        hintTimerRef.current = window.setTimeout(
-          () => setHintVisible(false),
-          duration
-        );
-      },
-      []
-    );
-  
-    useEffect(() => {
-      hintTimerRef.current = window.setTimeout(
-        () => setHintVisible(false),
-        3000
-      );
-  
-      return () => {
-        if (hintTimerRef.current !== null) {
-          window.clearTimeout(hintTimerRef.current);
-        }
-      };
-    }, []);
   
     // ----------------------------------------
     // ANIMATION CONTROLLER
@@ -230,10 +184,6 @@ import {
       // FLOAT is returning home.
       if (transitioningRef.current) return;
   
-      const option = EFFECTS.find(
-        (item) => item.id === next
-      )!;
-  
       // ------------------------------------
       // FLOAT -> OTHER EFFECT
       // ------------------------------------
@@ -252,7 +202,6 @@ import {
           setIsReturning(false);
           transitioningRef.current = false;
   
-          showHint(option.selectedHint);
         });
   
         return;
@@ -261,8 +210,6 @@ import {
       // ------------------------------------
       // NORMAL SWITCH
       // ------------------------------------
-  
-      showHint(option.selectedHint);
   
       if (next === effect) {
         // Replay one-shot animations.
@@ -319,32 +266,18 @@ import {
   
         {/* Effect selection */}
         <footer className="playground-footer">
-          <p className="playground-mode">
-            CURRENT MODE / {effect.toUpperCase()}
-          </p>
-  
           <nav
             className="playground-effects"
             aria-label="Typography effects"
           >
             {EFFECTS.map(
-              ({ id, label, hoverHint }) => (
+              ({ id, label }) => (
                 <button
                   type="button"
                   key={id}
                   disabled={isReturning}
                   aria-label={`${label.toLowerCase()} typography effect`}
                   aria-pressed={effect === id}
-                  onMouseEnter={() => {
-                    if (!isReturning) {
-                      showHint(hoverHint, 2700);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (!isReturning) {
-                      showHint(hoverHint, 2700);
-                    }
-                  }}
                   onClick={() => selectEffect(id)}
                   className={`effect-control ${
                     effect === id ? 'is-active' : ''
@@ -364,14 +297,6 @@ import {
             )}
           </nav>
   
-          <p
-            className={`playground-caption ${
-              hintVisible ? 'is-visible' : ''
-            }`}
-            aria-live="polite"
-          >
-            {hint}
-          </p>
         </footer>
       </section>
     );

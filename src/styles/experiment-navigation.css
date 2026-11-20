@@ -7,7 +7,7 @@
   bottom: clamp(19px, 3vh, 34px);
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
   align-items: center;
 
@@ -19,8 +19,7 @@
 
 .experiment-navigation__left { justify-self: start; }
 .experiment-navigation__right { justify-self: end; }
-.experiment-navigation__link,
-.experiment-navigation__home {
+.experiment-navigation__link {
   display: inline-block;
   padding: 9px 0;
   color: inherit;
@@ -29,13 +28,7 @@
   pointer-events: auto;
   transition: opacity 180ms ease, transform 240ms ease;
 }
-.experiment-navigation__home {
-  color: #77746d;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-.experiment-navigation__link:hover,
-.experiment-navigation__home:hover { opacity: .56; }
+.experiment-navigation__link:hover { opacity: .56; }
 .experiment-navigation__left .experiment-navigation__link:hover { transform: translateX(-5px); }
 .experiment-navigation__right .experiment-navigation__link:hover { transform: translateX(5px); }
 .experiment-navigation a:focus-visible {
@@ -44,7 +37,6 @@
 }
 @media (max-width: 620px) {
   .experiment-navigation { bottom: 12px; font-size: 11px; }
-  .experiment-navigation__home { font-size: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .experiment-navigation a { transition: none; }

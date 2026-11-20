@@ -5,7 +5,7 @@
 
 .sphere-experiment {
   position: relative;
-  height: 240svh;
+  height: 290svh;
   background: #f3f1ec;
   color: #171717;
 }
@@ -199,22 +199,6 @@
    HELPER TEXT
 --------------------------------------- */
 
-.sphere-pointer-hint {
-  position: absolute;
-  bottom: 4px;
-  left: 50%;
-
-  transform: translateX(-50%);
-  margin: 0;
-
-  white-space: nowrap;
-
-  font: 400 0.58rem/1.25 Arial, sans-serif;
-  letter-spacing: 0.08em;
-
-  color: #929087;
-  pointer-events: none;
-}
 
 .sphere-sr-only {
   position: absolute;
@@ -276,16 +260,6 @@
   .sphere-instruction {
     text-align: left;
   }
-
-  .sphere-pointer-hint {
-    display: none;
-  }
-}
-
-@media (hover: none) {
-  .sphere-pointer-hint {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -294,5 +268,39 @@
   }
 }
 
-/* Shared experiment header overrides */
-.sphere-heading { min-height: 25px; }
+/* Menu access from experiment 002 */
+.sphere-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.sphere-header-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(12px, 2vw, 28px);
+  font: 400 0.68rem/1.3 Arial, sans-serif;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.sphere-header-links a {
+  color: inherit;
+  text-decoration: none;
+}
+.sphere-header-links a:hover,
+.sphere-header-links a:focus-visible {
+  text-decoration: underline;
+}
+@media (max-width: 520px) {
+  .sphere-header-links a:first-child { display: none; }
+}
+
+/* Experiment 002 uses GSAP pinning, not a second CSS sticky scroll section. */
+.sphere-experiment { height: 100svh; min-height: 0; }
+.sphere-shell {
+  position: relative; top: auto; max-width: none; height: 100%;
+  display: flex; flex-direction: column;
+  padding-bottom: clamp(78px, 10vh, 110px);
+}
+.sphere-stage { flex: 1 1 auto; min-height: 0; }
+@media (max-width: 700px) { .sphere-shell { padding-bottom: 74px; } }

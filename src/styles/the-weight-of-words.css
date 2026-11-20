@@ -82,30 +82,6 @@
 .weight-brush::before { width: 9px; height: 1px; left: calc(50% - 4.5px); top: 50%; }
 .weight-brush::after { height: 9px; width: 1px; left: 50%; top: calc(50% - 4.5px); }
 
-.weight-footer {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 16px;
-  flex: none;
-  padding-top: clamp(16px, 2.5vh, 28px);
-  border-top: 1px solid var(--line);
-}
-.weight-eyebrow { font: 400 11px/1.4 var(--font-ui); letter-spacing: .12em; color: #817e76; }
-.weight-instruction { margin: 8px 0 0; font: 400 clamp(11px, 1vw, 14px)/1.5 var(--font-ui); color: #817e76; }
-.weight-restart {
-  flex: none;
-  padding: 8px 0 6px;
-  border: 0;
-  border-bottom: 1px solid var(--ink);
-  background: none;
-  color: var(--ink);
-  font: 500 clamp(12px, 1.1vw, 15px)/1.2 var(--font-ui);
-  cursor: pointer;
-}
-.weight-restart:hover:not(:disabled) { opacity: .55; }
-.weight-restart:disabled { opacity: .4; cursor: default; }
-.weight-restart:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .weight-reduced-text {
   position: absolute;
   inset: 0;
@@ -123,8 +99,6 @@
   .weight-page { min-height: 430px; padding: 18px; }
   .weight-index-label { display: none; }
   .weight-letter { font-size: clamp(30px, 7vw, 54px); }
-  .weight-footer { align-items: start; }
-  .weight-instruction { font-size: 10px; max-width: 28ch; }
 }
 @media (hover: none) {
   .weight-stage { cursor: auto; }
@@ -132,3 +106,7 @@
 @media (prefers-reduced-motion: reduce) {
   .weight-letter { will-change: auto; }
 }
+
+/* Reserve space for shared PREVIOUS / NEXT overlay. */
+.weight-page { padding-bottom: clamp(80px, 10vh, 110px); }
+@media (max-width: 700px) { .weight-page { padding-bottom: 74px; } }

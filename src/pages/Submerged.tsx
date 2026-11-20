@@ -104,12 +104,6 @@ export default function Submerged() {
         )}
       </div>
 
-      <footer className="submerged-footer">
-        <span className="submerged-caption">005 / A STUDY IN REFRACTION</span>
-        <span className="submerged-hint">{reducedMotion
-          ? 'MOVEMENT DISABLED BY YOUR SYSTEM PREFERENCE'
-          : 'MOVE TO DISTORT THE WORDS · CLICK TO MAKE A RIPPLE'}</span>
-      </footer>
     </section>
   );
 }

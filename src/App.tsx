@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import LoadingScreen from './components/LoadingScreen';
 import ExperimentNavigation from './components/ExperimentNavigation';
+import SiteMenu from './components/SiteMenu';
 import ExperimentIndex from './pages/ExperimentIndex';
 import WordsInMotion from './pages/WordsInMotion';
 import FindingForm from './pages/FindingForm';
@@ -184,6 +185,7 @@ export default function App() {
       {introPhase === 'ready' && !slide && currentSlug && (
         <ExperimentNavigation slug={currentSlug} />
       )}
+      {introPhase === 'ready' && <SiteMenu route={slide?.to ?? route} />}
     </>
   );
 }

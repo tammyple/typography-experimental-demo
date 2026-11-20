@@ -75,25 +75,6 @@ export default function TheWeightOfWords() {
         <div className="weight-floor" aria-hidden="true" />
       </div>
 
-      <footer className="weight-footer">
-        <div className="weight-footer-about">
-          <span className="weight-eyebrow">003 — GRAVITY STUDY</span>
-          <p className="weight-instruction">
-            {reducedMotion
-              ? 'PHYSICS ANIMATION DISABLED BY YOUR MOTION PREFERENCE'
-              : 'MOVE YOUR CURSOR TO SWEEP THE LETTERS · TOUCH AND DRAG ON MOBILE'}
-          </p>
-        </div>
-        <button
-          type="button"
-          className="weight-restart"
-          onClick={() => physicsRef.current?.restart()}
-          disabled={reducedMotion}
-          aria-label="Drop the letters again"
-        >
-          DROP AGAIN <span aria-hidden="true">↻</span>
-        </button>
-      </footer>
       <p className="weight-sr-only">{WEIGHT_TEXT}</p>
     </section>
   );

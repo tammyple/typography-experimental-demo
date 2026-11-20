@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { experiments, experimentUrl } from '../data/experiments';
 import '../styles/experiment-index.css';
 
@@ -26,33 +26,12 @@ export default function ExperimentIndex({
 }: {
   introPhase?: IntroPhase;
 }) {
-  const [aboutOpen, setAboutOpen] = useState(false);
-
-  useEffect(() => {
-    if (!aboutOpen) return;
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setAboutOpen(false);
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [aboutOpen]);
-
   return (
     <section
       className="experiment-index"
       data-intro-phase={introPhase}
       aria-labelledby="index-title"
     >
-      <header className="index-topbar">
-        <button
-          type="button"
-          className="index-about-trigger"
-          onClick={() => setAboutOpen(true)}
-        >
-          ABOUT ↗
-        </button>
-      </header>
-
       <div className="index-hero">
         <h1
           id="index-title"
@@ -98,34 +77,6 @@ export default function ExperimentIndex({
         })}
       </nav>
 
-      {aboutOpen && (
-        <div
-          className="index-about-overlay"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setAboutOpen(false);
-          }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="index-about-title"
-            className="index-about-dialog"
-          >
-            <div className="index-about-dialog-heading">
-              <h2 id="index-about-title">About.</h2>
-              <button type="button" autoFocus aria-label="Close about" onClick={() => setAboutOpen(false)}>×</button>
-            </div>
-            <p>
-              Tsunami of Words is an interactive collection exploring what happens
-              when typography, movement and language meet. Each experiment is a
-              different way to interact with words.
-            </p>
-            <button type="button" className="index-about-close" onClick={() => setAboutOpen(false)}>
-              BACK TO EXPERIMENTS ↗
-            </button>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
