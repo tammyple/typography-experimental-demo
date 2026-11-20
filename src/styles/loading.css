@@ -2,7 +2,7 @@
 .intro-loader {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 9000;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -41,17 +41,26 @@
 }
 
 .site-page--counting {
+  /* Hide the whole page while loading, including its thin divider lines.
+     The black loader remains above everything until the reveal starts. */
+  z-index: 1;
+  visibility: hidden;
   transform: translate3d(0, 100svh, 0);
 }
 
 /* The page itself pushes up across the black loading screen. */
 .site-page--revealing {
+  /* Lift the actual homepage above the loader only during the wipe. */
+  z-index: 9001;
+  visibility: visible;
   transform: translate3d(0, 0, 0);
   transition: transform 1250ms cubic-bezier(0.76, 0, 0.24, 1);
   will-change: transform;
 }
 
 .site-page--ready {
+  z-index: 1;
+  visibility: visible;
   transform: none;
 }
 

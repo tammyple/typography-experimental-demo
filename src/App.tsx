@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import LoadingScreen from './components/LoadingScreen';
 import ExperimentNavigation from './components/ExperimentNavigation';
@@ -49,6 +49,29 @@ export default function App() {
   const [slide, setSlide] = useState<Slide | null>(null);
   const currentRouteRef = useRef(route);
   const slideRef = useRef<Slide | null>(null);
+
+  // On a hard refresh the browser may restore yesterday's scroll position.
+  // Reset it before first paint, otherwise the opening hero appears cropped
+  // and seems to jump into place after the white page slides up.
+  useLayoutEffect(() => {
+    const previousRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    const resetScroll = () => window.scrollTo(0, 0);
+    resetScroll();
+    window.addEventListener('pageshow', resetScroll);
+    const frame = requestAnimationFrame(resetScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('pageshow', resetScroll);
+      window.history.scrollRestoration = previousRestoration;
+    };
+  }, []);
+
+  // Keep the first viewport anchored during both stages of the intro.
+  // In particular, don't let late font/layout changes trigger scroll anchoring.
+  useLayoutEffect(() => {
+    if (introPhase !== 'ready') window.scrollTo(0, 0);
+  }, [introPhase]);
 
   useEffect(() => {
     currentRouteRef.current = route;
@@ -133,12 +156,27 @@ export default function App() {
     return () => window.clearTimeout(timeout);
   }, [slide?.entering, slide?.to]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (introPhase === 'ready' && !slide) return;
-    const previousOverflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlBackground = html.style.backgroundColor;
+    const previousBodyBackground = body.style.backgroundColor;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    if (introPhase !== 'ready') {
+      // Black even behind the counter; no white divider can peek through.
+      html.style.backgroundColor = '#080808';
+      body.style.backgroundColor = '#080808';
+    }
+    if (introPhase !== 'ready') window.scrollTo(0, 0);
     return () => {
-      document.documentElement.style.overflow = previousOverflow;
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      html.style.backgroundColor = previousHtmlBackground;
+      body.style.backgroundColor = previousBodyBackground;
     };
   }, [introPhase, slide]);
 
@@ -146,7 +184,10 @@ export default function App() {
     if (introPhase !== 'revealing') return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const timer = window.setTimeout(
-      () => setIntroPhase('ready'),
+      () => {
+        window.scrollTo(0, 0);
+        setIntroPhase('ready');
+      },
       reduced ? 0 : PAGE_SLIDE_MS + 750
     );
     return () => window.clearTimeout(timer);
