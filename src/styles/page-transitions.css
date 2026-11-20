@@ -1,0 +1,25 @@
+/* The incoming experiment covers the previous page from the appropriate side. */
+.experiment-route-layer {
+  position: relative;
+  min-height: 100svh;
+  width: 100%;
+  background: #f3f1ec;
+}
+.experiment-route-layer--incoming {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  height: 100svh;
+  overflow: hidden;
+  transform: translate3d(var(--slide-entry, 100%), 0, 0);
+  transition: transform 900ms cubic-bezier(.76, 0, .24, 1);
+  will-change: transform;
+  pointer-events: none;
+  box-shadow: -7px 0 18px rgba(23, 23, 23, 0.035);
+}
+.experiment-route-layer--incoming.is-entering {
+  transform: translate3d(0, 0, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .experiment-route-layer--incoming { transition: none; transform: none; }
+}

@@ -1,130 +1,229 @@
-/* Main page: a single oversized headline, then the experiment index. */
+/* INDEX — oversized editorial title, compact experiment catalogue. */
 .experiment-index {
+  --index-gutter: clamp(18px, 3.7vw, 62px);
   min-height: 100svh;
   background: var(--canvas, #f3f1ec);
   color: var(--ink, #171717);
 }
 
+.index-topbar {
+  position: absolute;
+  z-index: 5;
+  top: clamp(18px, 3vw, 43px);
+  right: var(--index-gutter);
+}
+.index-about-trigger {
+  border: 0;
+  padding: 7px 0;
+  background: transparent;
+  color: inherit;
+  font: 400 clamp(12px, 1.05vw, 15px)/1.3 Inter, Arial, sans-serif;
+  cursor: pointer;
+  transition: opacity 180ms ease;
+}
+.index-about-trigger:hover { opacity: .55; }
+.index-about-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; }
+
+/* First viewport: big title + beginning of the experiment list. */
 .index-hero {
   box-sizing: border-box;
   width: 100%;
-  min-height: 100svh;
-  padding: clamp(20px, 4vw, 72px);
+  height: clamp(390px, 61svh, 650px);
+  padding: clamp(68px, 10vh, 110px) var(--index-gutter) 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
-
 .index-hero-heading {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.025em;
+  max-width: 100%;
   margin: 0;
-  font: 400 clamp(2.65rem, 10vw, 13rem)/0.98 var(--font-display, Georgia, serif);
-  letter-spacing: -0.026em;
-  text-align: left;
+  color: #171717;
+  font-family: 'Bodoni Moda', Georgia, serif;
+  font-size: clamp(4.5rem, 8.2vw, 10.5rem);
+  font-weight: 550;
+  line-height: .95;
+  letter-spacing: -0.035em;
+  text-align: center;
   user-select: none;
 }
-
 .index-hero-word {
-  display: flex;
+  display: inline-flex;
   align-items: baseline;
   white-space: nowrap;
-  width: max-content;
-  max-width: 100%;
 }
-
 .index-hero-letter-clip {
   display: inline-block;
   overflow: hidden;
-  padding-top: .15em;
-  margin-top: -.15em;
-  padding-bottom: .18em;
-  margin-bottom: -.18em;
+  padding: .17em .016em .20em;
+  margin: -.17em -.006em -.20em;
 }
-
 .index-hero-letter {
   position: relative;
   display: inline-block;
   transform-origin: 50% 85%;
-  will-change: transform;
   transition:
-    transform 850ms cubic-bezier(.18, 1, .28, 1),
-    opacity 400ms ease;
-  transition-delay: calc(360ms + var(--letter-index) * 28ms);
+    transform 900ms cubic-bezier(.18, 1, .28, 1),
+    opacity 460ms ease;
+  transition-delay: calc(220ms + var(--letter-index) * 30ms);
 }
-
-/* While counting, letters wait below their individual clipping masks. */
 .experiment-index[data-intro-phase='counting'] .index-hero-letter {
   transform: translateY(120%) rotate(6deg);
   opacity: 0;
 }
-
-/* Reveal and ready share the resting pose. */
 .experiment-index[data-intro-phase='revealing'] .index-hero-letter,
 .experiment-index[data-intro-phase='ready'] .index-hero-letter {
   transform: translateY(0) rotate(0);
   opacity: 1;
 }
-
-/* After loading, each letter reacts gently when pointed at. */
 @media (hover: hover) {
   .experiment-index[data-intro-phase='ready'] .index-hero-letter:hover {
-    transform: translateY(-.095em) rotate(-3deg);
-    transition-duration: 330ms;
+    transform: translateY(-.07em) rotate(-2deg);
+    transition-duration: 320ms;
     transition-delay: 0ms;
   }
 }
 
+/* The rows are deliberately smaller than the hero and may continue below the fold. */
 .experiment-index-list {
-  margin: 0 clamp(20px, 4vw, 72px);
+  margin: 0 var(--index-gutter);
+  padding-bottom: clamp(55px, 8vh, 108px);
   border-top: 1px solid var(--line, #b9b6ae);
-  padding-bottom: clamp(60px, 8vh, 120px);
 }
-
 .experiment-index-entry {
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: clamp(32px, 5vw, 70px) minmax(0, 1fr) 60px;
-  gap: clamp(8px, 2vw, 26px);
+  grid-template-columns: clamp(34px, 4vw, 60px) minmax(0, 1fr) 48px;
+  gap: clamp(10px, 1.55vw, 24px);
   align-items: center;
-  min-height: clamp(90px, 14vh, 165px);
-  padding: 14px 8px;
+  min-height: clamp(90px, 12svh, 122px);
+  padding: 14px 6px;
   border-bottom: 1px solid var(--line, #b9b6ae);
-  text-decoration: none;
   color: inherit;
-  transition: background-color 250ms ease, padding-left 250ms ease;
+  text-decoration: none;
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    clip-path 760ms cubic-bezier(.76, 0, .24, 1),
+    transform 730ms cubic-bezier(.18, 1, .28, 1),
+    opacity 480ms ease,
+    background-color 220ms ease,
+    padding-left 220ms ease;
 }
-
+.experiment-index[data-intro-phase='counting'] .experiment-index-entry {
+  clip-path: inset(0 100% 0 0);
+  transform: translateY(25px);
+  opacity: 0;
+}
+.experiment-index[data-intro-phase='revealing'] .experiment-index-entry {
+  clip-path: inset(0 0 0 0);
+  transform: translateY(0);
+  opacity: 1;
+  transition-delay: calc(620ms + var(--row-index) * 125ms);
+}
+.experiment-index[data-intro-phase='ready'] .experiment-index-entry {
+  clip-path: inset(0 0 0 0);
+  transform: translateY(0);
+  opacity: 1;
+  transition-delay: 0ms;
+}
 .experiment-index-entry:not(.is-unavailable):is(:hover, :focus-visible) {
-  background: rgba(23, 23, 23, .045);
-  padding-left: 22px;
+  background-color: rgba(23, 23, 23, 0.045);
+  padding-left: 18px;
 }
-
 .experiment-index-number,
 .experiment-index-arrow {
   color: #77746d;
-  font: 400 clamp(11px, 1.1vw, 15px)/1.3 var(--font-ui, Arial, sans-serif);
+  font: 400 clamp(11px, 1vw, 14px)/1.3 Inter, Arial, sans-serif;
 }
 .experiment-index-arrow { text-align: right; }
 .experiment-index-title {
   min-width: 0;
-  font: 400 clamp(1.9rem, 4.8vw, 4.8rem)/1.1 var(--font-display, Georgia, serif);
-  letter-spacing: -.025em;
+  font: 400 clamp(1.65rem, 2.8vw, 3.15rem)/1.05
+    'Bodoni Moda', Georgia, serif;
+  letter-spacing: -0.022em;
+  transition: transform 240ms ease;
 }
-.experiment-index-entry.is-unavailable { opacity: .4; }
+.experiment-index-entry:not(.is-unavailable):is(:hover, :focus-visible) .experiment-index-title {
+  transform: translateX(6px);
+}
+.experiment-index-entry.is-unavailable { opacity: .42; }
 
+/* The About page is a dialog on the index, not an experiment header. */
+.index-about-overlay {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0,0,0,.65);
+}
+.index-about-dialog {
+  box-sizing: border-box;
+  width: min(100%, 510px);
+  background: #f3f1ec;
+  padding: clamp(24px, 5vw, 45px);
+  color: #171717;
+}
+.index-about-dialog-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.index-about-dialog-heading h2 {
+  margin: 0;
+  font: 400 clamp(2.4rem, 5vw, 3.8rem)/1.1 'Bodoni Moda', Georgia, serif;
+}
+.index-about-dialog-heading button {
+  border: 0; background: transparent; cursor: pointer; font-size: 26px;
+}
+.index-about-dialog p {
+  margin: 27px 0 32px;
+  font: 400 1rem/1.65 Inter, Arial, sans-serif;
+}
+.index-about-close {
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid #171717;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: 500 12px/1.4 Inter, Arial, sans-serif;
+}
+
+@media (max-width: 900px) {
+  .index-hero { height: clamp(330px, 53svh, 530px); }
+  .index-hero-heading { font-size: clamp(3.7rem, 10vw, 7rem); }
+}
 @media (max-width: 650px) {
-  .index-hero { padding: 18px; }
-  .index-hero-heading { font-size: clamp(2.3rem, 10vw, 5rem); letter-spacing: -.026em; }
-  .experiment-index-list { margin: 0 18px; }
-  .experiment-index-entry { grid-template-columns: 38px minmax(0, 1fr) 36px; }
-  .experiment-index-title { font-size: clamp(1.55rem, 6vw, 2.5rem); }
+  .experiment-index { --index-gutter: 18px; }
+  .index-hero {
+    height: clamp(300px, 51svh, 450px);
+    padding: 65px 18px 18px;
+  }
+  .index-hero-heading {
+    font-size: clamp(2.9rem, 11vw, 5rem);
+    letter-spacing: -.025em;
+  }
+  .experiment-index-entry {
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
+    min-height: 87px;
+    gap: 8px;
+  }
+  .experiment-index-title { font-size: clamp(1.45rem, 5.9vw, 2.4rem); }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .index-hero-letter {
+  .index-hero-letter, .experiment-index-entry, .experiment-index-title {
+    clip-path: none !important;
     transform: none !important;
     opacity: 1 !important;
     transition: none !important;
   }
-  .experiment-index-entry { transition: none; }
 }

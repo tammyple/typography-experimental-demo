@@ -53,15 +53,7 @@ export default function TheWeightOfWords() {
 
   return (
     <section className="weight-page" aria-label="Experiment 003: The Weight of Words">
-      <header className="experiment-header">
-        <a className="experiment-header-brand" href="#/experiments">TSUNAMI OF WORDS</a>
-        <span className="experiment-header-title">EXPERIMENT 003 / THE WEIGHT OF WORDS</span>
-        <nav className="experiment-header-nav" aria-label="Experiment navigation"><a href="#/experiments">INDEX ↗</a></nav>
-      </header>
-
-      <div className="weight-rule" aria-hidden="true" />
-
-      <div className="weight-stage" ref={stageRef}>
+<div className="weight-stage" ref={stageRef}>
         {reducedMotion ? (
           <p className="weight-reduced-text">{WEIGHT_TEXT}</p>
         ) : (

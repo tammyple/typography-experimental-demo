@@ -42,6 +42,7 @@ export default function Unsaid() {
     let raf = 0;
     let startTime = 0;
     let visible = true;
+    let lastPaintTime = -Infinity;
 
     let previousMouse: Point | null = null;
     let previousTime = 0;
@@ -67,7 +68,9 @@ export default function Unsaid() {
     function resize() {
       const w = Math.max(1, stage.clientWidth);
       const h = Math.max(1, stage.clientHeight);
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      // Avoid repainting an oversized 2x Retina canvas on every pointer frame.
+      // 1.5x keeps the typography crisp without overworking the compositor.
+      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
       if (w === width && h === height && ratio === dpr) return;
 
       width = w;
@@ -151,7 +154,12 @@ export default function Unsaid() {
 
     function tick(timestamp: number) {
       if (!startTime) startTime = timestamp;
-      if (visible) paint(timestamp);
+      // The display may request 120Hz or more, but rendering at ~60fps
+      // leaves more time for input and prevents mask processing from lagging.
+      if (visible && timestamp - lastPaintTime >= 1000 / 60 - 1) {
+        paint(timestamp);
+        lastPaintTime = timestamp;
+      }
       raf = requestAnimationFrame(tick);
     }
 
@@ -190,14 +198,6 @@ export default function Unsaid() {
 
   return (
     <section className="unsaid-page" aria-label="Experiment 004: Unsaid">
-      <header className="experiment-header">
-        <a className="experiment-header-brand" href="#/experiments">TSUNAMI OF WORDS</a>
-        <span className="experiment-header-title">EXPERIMENT 004 / UNSAID</span>
-        <nav className="experiment-header-nav" aria-label="Experiment navigation"><a href="#/experiments">INDEX ↗</a></nav>
-      </header>
-
-      <div className="unsaid-rule" aria-hidden="true" />
-
       <div
         className="unsaid-stage"
         ref={stageRef}
@@ -220,9 +220,6 @@ export default function Unsaid() {
 
       <footer className="unsaid-footer">
         <span className="unsaid-instruction">MOVE TO REVEAL · WATCH IT FADE</span>
-        <a href="#/experiments/the-weight-of-words" className="unsaid-previous">
-          ← PREVIOUS
-        </a>
       </footer>
       <p className="unsaid-sr-only">
         The repeated phrase is “{ERASURE.repeatedText}”. Moving the pointer

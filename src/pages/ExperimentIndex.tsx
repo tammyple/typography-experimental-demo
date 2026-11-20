@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { experiments, experimentUrl } from '../data/experiments';
 import '../styles/experiment-index.css';
 
@@ -26,23 +26,46 @@ export default function ExperimentIndex({
 }: {
   introPhase?: IntroPhase;
 }) {
+  const [aboutOpen, setAboutOpen] = useState(false);
+
+  useEffect(() => {
+    if (!aboutOpen) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setAboutOpen(false);
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [aboutOpen]);
+
   return (
     <section
       className="experiment-index"
       data-intro-phase={introPhase}
       aria-labelledby="index-title"
     >
-      {/* The opening page contains just the large interactive title. */}
+      <header className="index-topbar">
+        <button
+          type="button"
+          className="index-about-trigger"
+          onClick={() => setAboutOpen(true)}
+        >
+          ABOUT ↗
+        </button>
+      </header>
+
       <div className="index-hero">
-        <h1 id="index-title" className="index-hero-heading" aria-label="Typography Experiment">
+        <h1
+          id="index-title"
+          className="index-hero-heading"
+          aria-label="Typography Experiment"
+        >
           <AnimatedWord word="Typography" offset={0} />
           <AnimatedWord word="Experiment" offset={10} />
         </h1>
       </div>
 
-      {/* Keep the experiment links reachable below the intro. */}
       <nav className="experiment-index-list" aria-label="Choose an experiment">
-        {experiments.map((experiment) => {
+        {experiments.map((experiment, index) => {
           const content = (
             <>
               <span className="experiment-index-number">{experiment.id}</span>
@@ -52,12 +75,13 @@ export default function ExperimentIndex({
               </span>
             </>
           );
-
+          const stagger = { '--row-index': index } as CSSProperties;
           return experiment.available ? (
             <a
               key={experiment.id}
               href={experimentUrl(experiment.slug)}
               className="experiment-index-entry"
+              style={stagger}
             >
               {content}
             </a>
@@ -65,6 +89,7 @@ export default function ExperimentIndex({
             <div
               key={experiment.id}
               className="experiment-index-entry is-unavailable"
+              style={stagger}
               aria-label={`${experiment.title}, coming soon`}
             >
               {content}
@@ -72,6 +97,35 @@ export default function ExperimentIndex({
           );
         })}
       </nav>
+
+      {aboutOpen && (
+        <div
+          className="index-about-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setAboutOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="index-about-title"
+            className="index-about-dialog"
+          >
+            <div className="index-about-dialog-heading">
+              <h2 id="index-about-title">About.</h2>
+              <button type="button" autoFocus aria-label="Close about" onClick={() => setAboutOpen(false)}>×</button>
+            </div>
+            <p>
+              Tsunami of Words is an interactive collection exploring what happens
+              when typography, movement and language meet. Each experiment is a
+              different way to interact with words.
+            </p>
+            <button type="button" className="index-about-close" onClick={() => setAboutOpen(false)}>
+              BACK TO EXPERIMENTS ↗
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

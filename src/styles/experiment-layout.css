@@ -1,0 +1,30 @@
+/* Shared navigation breathing room; existing experiment styles stay intact. */
+.experiment-route-layer .playground-screen {
+  padding-bottom: clamp(86px, 10vh, 118px);
+}
+.experiment-route-layer .playground-divider { margin-top: 0; }
+
+/* Experiment 002 already uses GSAP's pin:true; remove CSS sticky/290svh. */
+.experiment-route-layer .sphere-experiment { height: 100svh; min-height: 0; }
+.experiment-route-layer .sphere-shell {
+  position: relative;
+  top: auto;
+  max-width: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: clamp(78px, 10vh, 110px);
+}
+.experiment-route-layer .sphere-stage { flex: 1 1 auto; min-height: 0; }
+
+.experiment-route-layer .weight-page { padding-bottom: clamp(80px, 10vh, 110px); }
+.experiment-route-layer .unsaid-page { padding-bottom: clamp(76px, 10vh, 106px); }
+.experiment-route-layer .submerged-page { padding-bottom: clamp(76px, 10vh, 106px); }
+
+@media (max-width: 700px) {
+  .experiment-route-layer .playground-screen,
+  .experiment-route-layer .sphere-shell,
+  .experiment-route-layer .weight-page,
+  .experiment-route-layer .unsaid-page,
+  .experiment-route-layer .submerged-page { padding-bottom: 74px; }
+}

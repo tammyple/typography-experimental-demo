@@ -68,9 +68,6 @@ import {
     const [isReturning, setIsReturning] =
       useState(false);
   
-    const [aboutOpen, setAboutOpen] =
-      useState(false);
-  
     const [hint, setHint] = useState(
       'Choose an effect to bring the words to life.'
     );
@@ -129,26 +126,6 @@ import {
         }
       };
     }, []);
-  
-    // ----------------------------------------
-    // ABOUT MODAL
-    // ----------------------------------------
-  
-    useEffect(() => {
-      if (!aboutOpen) return;
-  
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          setAboutOpen(false);
-        }
-      };
-  
-      document.addEventListener('keydown', onKey);
-  
-      return () => {
-        document.removeEventListener('keydown', onKey);
-      };
-    }, [aboutOpen]);
   
     // ----------------------------------------
     // ANIMATION CONTROLLER
@@ -310,16 +287,7 @@ import {
         className="playground-screen"
         aria-label="Tsunami of Words typography playground"
       >
-        <header className="experiment-header">
-          <a className="experiment-header-brand" href="#/experiments">TSUNAMI OF WORDS</a>
-          <span className="experiment-header-title">EXPERIMENT 001 / WORDS IN MOTION</span>
-          <nav className="experiment-header-nav" aria-label="Experiment navigation">
-            <a href="#/experiments">INDEX ↗</a>
-            <a href="#/experiments/finding-form">NEXT ↘</a>
-            <button type="button" onClick={() => setAboutOpen(true)} className="cursor-pointer hover:opacity-60">ABOUT ↗</button>
-          </nav>
-        </header>
-
+        {/* First horizontal divider */}
         <div className="playground-divider" />
   
         {/* Typography animation stage */}
@@ -405,57 +373,6 @@ import {
             {hint}
           </p>
         </footer>
-  
-        {/* About dialog */}
-        {aboutOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-5"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) {
-                setAboutOpen(false);
-              }
-            }}
-          >
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="about-title"
-              className="w-full max-w-[480px] bg-[#f3f1ec] p-7 shadow-2xl sm:p-10"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <h2
-                  id="about-title"
-                  className="font-serif text-4xl"
-                >
-                  About this experiment.
-                </h2>
-  
-                <button
-                  type="button"
-                  autoFocus
-                  aria-label="Close about"
-                  onClick={() => setAboutOpen(false)}
-                  className="cursor-pointer text-2xl"
-                >
-                  ×
-                </button>
-              </div>
-  
-              <p className="mt-7 leading-relaxed">
-                Tsunami of Words explores how typography
-                moves, changes, and becomes language.
-              </p>
-  
-              <button
-                type="button"
-                onClick={() => setAboutOpen(false)}
-                className="mt-8 border-b border-black pb-1 text-sm"
-              >
-                BACK TO EXPERIMENT ↗
-              </button>
-            </div>
-          </div>
-        )}
       </section>
     );
   }

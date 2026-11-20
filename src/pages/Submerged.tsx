@@ -93,15 +93,7 @@ export default function Submerged() {
 
   return (
     <section className="submerged-page" aria-label="Experiment 005: Submerged">
-      <header className="submerged-header">
-        <a href="#/experiments" className="submerged-brand">TSUNAMI OF WORDS</a>
-        <span className="submerged-id">EXPERIMENT 005 / SUBMERGED</span>
-        <a href="#/experiments" className="submerged-nav">INDEX ↗</a>
-      </header>
-
-      <div className="submerged-rule" aria-hidden="true" />
-
-      <div className="submerged-stage" ref={stageRef}>
+<div className="submerged-stage" ref={stageRef}>
         <canvas ref={canvasRef} className="submerged-canvas" aria-hidden="true" />
         <div ref={cursorRef} className="submerged-cursor" aria-hidden="true">
           <span className="submerged-cursor-cross">+</span>
@@ -117,7 +109,6 @@ export default function Submerged() {
         <span className="submerged-hint">{reducedMotion
           ? 'MOVEMENT DISABLED BY YOUR SYSTEM PREFERENCE'
           : 'MOVE TO DISTORT THE WORDS · CLICK TO MAKE A RIPPLE'}</span>
-        <a href="#/experiments" className="submerged-nav">ALL EXPERIMENTS ↗</a>
       </footer>
     </section>
   );
