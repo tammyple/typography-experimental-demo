@@ -1,0 +1,71 @@
+/* Intro backdrop: stays in place while the REAL page moves over it. */
+.intro-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #080808;
+  color: #fff;
+}
+
+.intro-loader__count {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font: 500 clamp(7rem, 24vw, 25rem)/0.85 Inter, Arial, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.075em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.intro-loader__number {
+  text-align: center;
+}
+
+.intro-loader__symbol {
+  font-size: 0.28em;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin: 0.1em 0 0 0.12em;
+}
+
+/* The white page is positioned BELOW the viewport while counting. */
+.site-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  background: #f3f1ec;
+}
+
+.site-page--counting {
+  transform: translate3d(0, 100svh, 0);
+}
+
+/* The page itself pushes up across the black loading screen. */
+.site-page--revealing {
+  transform: translate3d(0, 0, 0);
+  transition: transform 1250ms cubic-bezier(0.76, 0, 0.24, 1);
+  will-change: transform;
+}
+
+.site-page--ready {
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .intro-loader__count {
+    font-size: clamp(5.5rem, 25vw, 10rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-page--counting,
+  .site-page--revealing,
+  .site-page--ready {
+    transform: none;
+    transition: none;
+  }
+}

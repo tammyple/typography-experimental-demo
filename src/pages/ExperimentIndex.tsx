@@ -1,31 +1,52 @@
+import type { CSSProperties } from 'react';
 import { experiments, experimentUrl } from '../data/experiments';
 import '../styles/experiment-index.css';
 
-export default function ExperimentIndex() {
-  return (
-    <section className="experiment-index" aria-labelledby="index-title">
-      <header className="experiment-index-header">
-        <a href="#/experiments" className="experiment-index-brand">
-          TSUNAMI OF WORDS
-        </a>
-        <span>AN INTERACTIVE COLLECTION / 2026</span>
-      </header>
+type IntroPhase = 'counting' | 'revealing' | 'ready';
 
-      <div className="experiment-index-intro">
-        <p className="experiment-index-eyebrow">A COLLECTION OF EXPERIMENTS</p>
-        <h1 id="index-title">Experiments.</h1>
-        <p>Words, movement, and the ways they find meaning.</p>
+function AnimatedWord({ word, offset }: { word: string; offset: number }) {
+  return (
+    <span className="index-hero-word" aria-hidden="true">
+      {Array.from(word).map((letter, i) => (
+        <span className="index-hero-letter-clip" key={`${letter}-${i}`}>
+          <span
+            className="index-hero-letter"
+            style={{ '--letter-index': offset + i } as CSSProperties}
+          >
+            {letter}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+export default function ExperimentIndex({
+  introPhase = 'ready',
+}: {
+  introPhase?: IntroPhase;
+}) {
+  return (
+    <section
+      className="experiment-index"
+      data-intro-phase={introPhase}
+      aria-labelledby="index-title"
+    >
+      {/* The opening page contains just the large interactive title. */}
+      <div className="index-hero">
+        <h1 id="index-title" className="index-hero-heading" aria-label="Typography Experiment">
+          <AnimatedWord word="Typography" offset={0} />
+          <AnimatedWord word="Experiment" offset={10} />
+        </h1>
       </div>
 
+      {/* Keep the experiment links reachable below the intro. */}
       <nav className="experiment-index-list" aria-label="Choose an experiment">
         {experiments.map((experiment) => {
-          const contents = (
+          const content = (
             <>
               <span className="experiment-index-number">{experiment.id}</span>
               <span className="experiment-index-title">{experiment.title}</span>
-              <span className="experiment-index-description">
-                {experiment.description}
-              </span>
               <span className="experiment-index-arrow" aria-hidden="true">
                 {experiment.available ? '↗' : 'SOON'}
               </span>
@@ -35,10 +56,10 @@ export default function ExperimentIndex() {
           return experiment.available ? (
             <a
               key={experiment.id}
-              className="experiment-index-entry"
               href={experimentUrl(experiment.slug)}
+              className="experiment-index-entry"
             >
-              {contents}
+              {content}
             </a>
           ) : (
             <div
@@ -46,16 +67,11 @@ export default function ExperimentIndex() {
               className="experiment-index-entry is-unavailable"
               aria-label={`${experiment.title}, coming soon`}
             >
-              {contents}
+              {content}
             </div>
           );
         })}
       </nav>
-
-      <footer className="experiment-index-footer">
-        <span>SELECT AN EXPERIMENT TO BEGIN</span>
-        <span>{experiments.filter((item) => item.available).length} AVAILABLE</span>
-      </footer>
     </section>
   );
 }

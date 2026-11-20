@@ -7,6 +7,6 @@ export const SUBMERGED = {
   /** Lens radius in pixels is also scaled to the stage dimensions. */
   maxLensRadius: 245,
   lensScale: 0.29,
-  rippleSpeed: 3.8,
-  distortion: 1.0,
+  rippleSpeed: 4.8,
+  distortion: 1.5,
 } as const;
